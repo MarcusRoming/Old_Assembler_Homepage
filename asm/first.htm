@@ -1,0 +1,118 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+Nun werde ich zeigen wie man ein einfaches Assemblerprogramm schreibt. Es geht mir vor allem
+darum, zu zeigen wie ein Assemblerprogramm aufgebaut ist und wie man es assembliert und linkt.
+Das erste Programm wird eine EXE Datei sein, die lediglich den Text "Hallo Welt !" auf dem 
+Bildschirm anzeigt. Das Programm "Hallo Welt" ist als erstes Programm eigentlich Standart, 
+und auch ich werde mich daran halten.<BR>
+<BR>
+Um das Programm zu erstellen ben&ouml;tigen Sie lediglich einen ASCII Editor, am besten das
+DOS-Programm Edit. Die Datei sollte die Erweiterung asm haben. Erstellen Sie also z.B. eine
+neue Datei mit dem Namen first.asm indem sie im DOS folgendes eingeben: edit first.asm und 
+dann Return oder Enter dr&uuml;cken.<BR>
+In die Datei selbst schreiben Sie dann Folgendes mit Ausnahme des Textes hinter dem ; ,denn
+der sagt dem Assembler, dass ein Kommentar folgt, und den k&ouml;nnen Sie weglassen:
+<BR>
+<pre>
+
+                        .MODEL SMALL   ;Das ist das Speichermodell,das verwendet wird
+                        .STACK 100h    ;Die gr&ouml;sse des Stack´s festlegen
+                        .DATA          ;Beginn des Datensegments
+
+Meldung                  DB  "Hallo Welt!$"  ;Die Meldung selbst 
+                                                     
+                        .CODE
+                         mov  ax,@data  ;Adresse des Datensegments (@data) nach ax      
+                         mov  ds,ax     ;Die Adresse des Datensegmnets in das Segmentregister
+                                      
+                         mov  dx,OFFSET Meldung  ;Die Offsetadresse von Meldung nach dx
+                         mov  ah,09h             ;Den Wert neun nach ah schieben
+                         int  21h                ;Interrupt 21h Funktion 09h aufrufen
+                                                 ;= Write String. Geschrieben wird bis zum $
+                         mov  ah,4Ch             ;DOS Funktion Programm beenden
+                         int  21h                ;Programm beenden
+                            
+                         END                     ;Anweisung an den Assembler.
+</pre>
+<BR>
+Das Programm selbst ist momentan noch Nebensache. Es geht hier vor allem darum, aus diesem
+Code eine ausf&uuml;hrbare EXE-Datei (von engl. execute = ausf&uuml;hren) zu erstellen.
+Dazu muss die asm Datei erst einmal assembliert werden. Wir erinnern uns: Der Assembler
+macht aus den symbolischen Anweisungen die Sie gerade eingegeben haben Maschinenbefehle,
+die der Computer versteht. <BR>
+Geben Sie also am DOS-Prompt ein: TASM first  und dr&uuml;cken Sie Return.<BR>
+Die Endung .asm wird automatisch angeh&auml;ngt.<BR>
+<BR>
+Nun Erzeugt der Assembler eine Objektdatei (first.obj).<BR>
+Auf dem Bildschirm sollten Sie folgendes sehen: 
+<pre>
+
+Turbo Assembler  Version 4.0  Copyright (c) 1988, 1993 Borland International
+
+Assembling file:   first.ASM
+Error messages:    None
+Warning messages:  None
+Passes:            1
+Remaining memory:  455k
+</pre>
+Wenn nicht, &uuml;berpr&uuml;fen Sie, ob sie keine Fehler gemacht haben, tut sich gar nichts,
+&uuml;berpr&uuml;fen Sie ob der Pfad ihres Assemblers bzw. Linkers in der PATH Variable der 
+Datei Autoexec.bat steht.<BR>
+<BR>
+Geben Sie nun am DOS-Prompt ein: TLINK first  und dr&uuml;cken Sie Return.<BR>
+Die Endung .obj wird automatisch angh&auml;ngt.<BR>
+<BR>
+Nun Erzeugt der Linker eine EXE-Datei (first.exe aus der Datei first.obj).<BR>
+Auf dem Bildschirm sollten Sie folgendes sehen: <BR>
+<pre>
+Turbo Link  Version 6.00 Copyright (c) 1992, 1993 Borland International
+
+Starten Sie nun First.exe. Sie sollten etwa folgendes sehen:
+
+C:\>first
+Hallo Welt!
+C:\>
+</pre>
+Sollte dies nicht der Fall sein, dann &uuml;berpr&uuml;fen Sie nochmal die asm Datei, und assemblieren 
+und linken diese dann nochmal. Wenn sie den Microsoft Assembler verwenden lauten die 
+Anweisungen MASM first bzw. LINK first ! Infos zu neueren MASM-Versionen <a href="masm.htm">Hier!!</a>
+Best. Linker k&ouml;nnen folgenden Fehler erzeugen: fatal: no entry point. Dann muß man den
+Entrypoint explizit angeben (bei MASM immer!), der Entrypoint ist der Punkt im CODE wo das Programm bei der 
+Ausführung dann startet. <BR>
+Hier die <a href="old.asm">modifizierte ASM-Datei</a>. Sie müssen dann auch alle anderen EXE-Projekte 
+dementsprechend ab&auml;ndern!<BR>
+<BR>
+Die Mapdatei (first.map) die vom Linker noch erzeugt wird, enth&auml;lt Informationen &uuml;ber die
+Segmente des Programmes, schauen Sie einfach mal rein (edit first.map).<BR>
+<BR>
+Nun werden Sie vielleicht fragen, wieso so umst&auml;ndlich, k&ouml;nnte das nicht ein einziges
+Programm erledigen ? Nun der Linker ist eigentlich dazu da, mehrere OBJ Dateinen zusammen zu 
+linken (engl. link=verbinden). Das ist zum Beispiel dann wichtig, wenn an einem Projekt
+mehrere Menschen arbeiten. In unserem Fall ist es nur eine OBJ Datei.<BR>
+<BR>
+Nun werde ich die Befehle von oben anhand des Programmes genauer <a href="asm1.htm">erkl&auml;ren</a>.  
+<BR><BR>
+<center>
+<a href="binhex.htm">Zur&uuml;ck</a>   <a href="asm1.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</font></p>
+</body> 

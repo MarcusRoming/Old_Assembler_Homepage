@@ -1,0 +1,35 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Programme</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 02.01.05</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+
+Hier werde ich noch zwei kleine Programme vorstellen: <BR><BR><B>Das Erste</B> gibt eine <I><B>vorzeichenbehaftete 32-Bit Zahl</B></I> aus (Übergabe in EAX). Ich habe es als Ergänzung zu den Ausgabeprozeduren in unserem Buch programmiert. Sie bekommen es <a href="modul32.zip"><B>hier!</B></a> (2 kByte)<BR><BR>
+
+<B>Das Zweite</B> ist von eher speziellem Interesse: Es kommuniziert mit der Oszilloskopsoftware der Velleman-Oszilloskope PCS100 und PCS500 (nur Kanal 1) über die DLL dsolink.dll. Es berechnet dabei unter anderem den Wert tau, also die Zeitkonstante bei einer Kondensatorentladung. Dabei sollte die aufgenommene Kurve für ein sinnvolles Ergebnis ungefähr (!) so aussehen:<br><BR><BR>
+<center><img src="gfx/tau.jpg"></center><br><BR>
+Aufgenommen über Trigger an, Trigger Edge: "Arrow down" und Trigger Level knapp unter der Kondensatorspannung. Die Berechnung startet vom allerersten Punkt. Nähere Infos zur Nutzung der DSOLink.dll und somit des Programmes auch in der Hilfe des Oszilloskopes! Das Programm ist vor allem als Beispiel anzusehen... Keine Gewähr für die Richtigkeit der angezeigten Daten versteht sich. Das Win32-Assemblerprogramm gibt es mitsamt Quellcode <a href="dso.zip"><B>hier</B></a> (30 kByte). Angezeigt wird auch die Spitze-Spitze-Spannung sowie die Sample-Rate usw.:
+<center><br><BR><img src="gfx/prog.gif"><br><br></center>
+
+
+
+<br><BR><BR>
+<a href="index.html">Zurück!</a>
+</BODY>
+</HTML>

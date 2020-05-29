@@ -1,0 +1,92 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+<BLOCKQUOTE>Mit diesem Thema werde ich wie mit allem Mathematischen verfahren: Kurz und schnell. Es gibt 
+schliesslich Taschenrechner. Dennoch sind Grundkenntnisse hier sehr wichtig.</BLOCKQUOTE><BR>
+<BR>
+<li> <u>Das Hexadezimalsystem.</u><BR>
+Das hexadezimale Zahlensystem arbeitet mit der Basis 16. Es werden die Ziffern 0-9 verwendet, 
+die restlichen Werte (10 bis 15) werden mit den Buchstaben A,B,C,D,E und F besetzt:<BR>
+<BR><pre>
+Dezimal    : 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26...<BR>
+Hexadezimal: 1 2 3 4 5 6 7 8 9 A  B  C  D  E  F  10 11 12 13 14 15 18 19 1A 1B 1C...<BR>
+</pre>
+Eine hexadezimale Zahl hat meist ein h oder H am Ende. Der Assembler ben&ouml;tigt bei
+Hex Zahlen welche mit einem Buchstaben beginnen eine F&uuml;hrungsnull, also statt FFh
+0FFh ! Die ist nur f&uuml;r den Assembler wichtig, um nichts falsch zu interpretieren.<BR>
+<BR>
+<u>2. Das Dualsystem.</u><BR>
+Das Dualsystem arbeitet mit der Basis 2. Bin&auml;re Zahlen werden mit einem b oder B am Ende
+gekennzeichnet also zum Beispiel 10010001b.<BR>
+Die Umrechnung von Dual-Zahlen zu Dezimalen-Zahlen geht so:<BR>
+Gegeben sei die Zahl 10101b Umrechnung: <BR>
+<BR><pre>
+Ziffer Dual:   1    0    1    0    1    
+Basis      :  2^4  2^3  2^2  2^1  2^0   (^ = hoch)
+
+Ziffer dezimal = 2^4*1 + 2^3*0 + 2^2*1 + 2^1*0 + 2^0*1 = 16+0+4+0+1 = 21
+</pre>
+Einfach oder ?<BR>
+<BR>
+<u>Nun noch die logischen Operatoren:</u><BR>
+<BR>
+Logische Operatoren verkn&uuml;pfen zwei Werte immer Bitweise.<BR>
+<BR><BR>
+1. Die AND-Verkn&uuml;pfung:<BR>
+<pre>
+  <u>Bit1  Bit2  AND</u>
+   0     0     0
+   1     0     0
+   0     1     0
+   1     1     1
+</pre>
+<BR>
+--&gt; Nur wenn beide Bits gesetzt sind ergibt die Verkn&uuml;pfung den Wert 1<BR>
+<BR>
+2. Die OR-Verkn&uuml;pfung:
+<pre>
+  <u>Bit1  Bit2   OR</u>
+   0     0     0
+   1     0     1
+   0     1     1
+   1     1     1
+</pre>
+--&gt; Es kommt 1 heraus, wenn eines oder beide Bits den Wert 1 haben.<BR>
+<BR>
+3. Die XOR-Verkn&uuml;pfung (Exklusiv - Oder):
+<pre>
+  <u>Bit1  Bit2  XOR</u>
+   0     0     0
+   1     0     1
+   0     1     1
+   1     1     0
+
+--&gt; Nur wenn beide Bits unterschiedliche Werte haben kommt 1 heraus.</pre>
+<BR>
+NOT invertiert einfach alle Bits.<BR>
+<BR>
+Nun kommt endlich das erste <a href="first.htm">Programm</a> !<BR>
+<BR>
+<center>
+<a href="8086.htm">Zur&uuml;ck</a>   <a href="first.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</font></p>
+</body>

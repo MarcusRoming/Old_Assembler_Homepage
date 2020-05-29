@@ -1,0 +1,193 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+Der 8086 Prozessor ist wie bereits erw&auml;hnt der Vorg&auml;nger heutiger Prozessoren wie der
+80486´er (kurz 486´er) Prozessor sowie des Pentium bzw. Pentium II Prozessors. Der 8086´er 
+war der erste Prozessor, der 1 MB Speicher adressieren konnte, was damals noch recht viel war. 
+Prinzipiell gibt es nur wenig Unterschiede zwischen einem 8086 und z.B. einem 80486´er. 
+Der 486´er hat eine h&ouml;here Taktfrequenz (z.B 66 MHz statt 8 MHz) und ben&ouml;tigt pro Befehl
+weniger Takte. Auch verf&uuml;gt er &uuml;ber gr&ouml;ssere Register (32 statt 16 Bit), einen breiteren 
+Daten und Adress-Bus und einen integrierten Coprozessor (zumindest der 486 DX)...
+Hilfe ! Was zur H&ouml;lle ist ein Register oder was ist die Taktfrequenz und das andere Zeug 
+werden Sie jetzt vielleicht sagen. Nun genau das m&ouml;chte ich hier kurz erl&auml;utern.
+Zuerst werde ich erkl&auml;ren was ein Bit und was ein Byte ist. Der Computer kann eigentlich nur
+zwischen zwei Zust&auml;nden unterscheiden, n&auml;mlich 1 und 0 d.h. soviel wie Strom oder nicht
+Strom. Ein Bit stellt also die kleinste Speichereinheit dar. Aufgrund der Prozessorarchitektur
+k&ouml;nnen jedoch Daten nicht in beliebiger Gr&ouml;sse verarbeitet werden. Da die internen 
+Verbindungswege (Bus) aus mindestens 8 Leitungen bestehen, haben die Entwickler von Intel 
+beschlossen, 8 Bits zu einer Einheit zusammenzufassen: Das Byte. Ein Byte ist also gleich 8 
+Bits.<BR><BR>
+Da ein Bit entweder 0 oder 1 speichern kann, also 2 Zust&auml;nde annehmen kann, kann ein Byte 
+2 hoch 8 also 256 Zustände annehmen oder Zahlen von 0 bis 255 entsprechen. Das Bit das am 
+weitesten links steht, ist Bit Nummer 7. Es ist das sogen. h&ouml;herwerigste Bit. Das Bit rechts
+aussen ist Bit Nummer 0, ist das niederwertigste Bit. Es ergibt sich also folgende Abfolge:<BR><BR>
+
+h&ouml;herwertigstes Bit --&gt; 7 6 5 4 3 2 1 0 &lt;-- niederwertigstes Bit. <BR><BR>
+<pre>
+Zwei Byte ergeben ein Wort (engl. Word). Dies teilt sich auf in zwei Byte - Teile:<BR>
+Word: [ (15 14 13 12 11 10 9 8)  (7 6 5 4 3 2 1 0)  ]
+           h&ouml;herwertiges Byte     niederwertiges Byte
+</pre>
+
+Analog dazu gibt es noch das Doppelwort (Doubleword=4Bytes), das Quadwort (Quadword=8Bytes)
+und noch ein paar gr&ouml;ssere, die aber nicht so wichtig sind.<BR>
+Um gr&ouml;ssere Speichersummen anzugeben verwendet man noch Kilobyte, Megabyte und Gigabyte:
+1024 Byte sind ein Kilobyte (KB), 1024 Kilobyte sind ein Megabyte (MB) und 1024 Megabyte sind
+ein Gigabyte.<BR><BR>
+
+Und nun zu Thema Taktfrequenz. Die Taktfrequenz wird meist in Megahertz (MHz) angegeben.
+Ein Hertz ist eine Schwingung pro Sekunde, ein Megahertz entspricht folglich einer Million 
+Schwingungen pro Sekunde. Je höher die Taktfrequenz desto mehr Arbeitseinheiten in der Sekunde
+kann der Prozessor verarbeiten und desto schneller ist der Informationsfluss und somit der 
+Computer. Jeder Maschinenbefehl braucht mindestens ein Takt meist jedoch mehr. Je moderner
+der Prozessor desto weniger Takte werden pro Befehl benötigt. So ben&ouml;tigt z.B. der Befehl NOP,
+das ist der Befehl, der im Prinzip nichts tut (No Operation), auf einem 8086´er noch 3 Takte,
+auf einem 486´er ben&ouml;tigt er 1 Takt. Moderne Prozessoren (Pentium aufw&auml;rts) k&ouml;nnen 
+auch zwei Befehle gleichzeitig ausf&uuml;hren, jedoch sind nur bestimmte Kombinationen zugelassen.
+<BR><BR>
+Zum Schluss kommt das wichtigste: Die Register. Register sind Speicher, welche sich im Prozessor
+befinden, und daher extrem schnell sind. Der Nachteil ist, dass sie klein sein m&uuml;ssen, um in den
+Prozessor zu passen. Bis zum 286´er gibt es 16 Bit Register danach 32 Bit Register, welche
+immer ein E vor dem Namen haben (z.B. EAX 32 Bit, AX 16 Bit). F&uuml;r den Anfang werde ich jedoch
+nur mit 16 Bit Registern arbeiten, der Einfachheit halber. Man kann die Register in vier 
+Kategorien unterteilen: Allzweckregister, Segmentregister, Zeige und Indexregister, 
+Flagregister.<BR><BR>
+
+<u>1. Allzweckregister:</u><BR>   
+Die Allzweckregister haben eine Besonderheit: Sie lassen sich in zwei Teile unterteilen, einen
+High- und einen Low-Teil von jeweils 8 Bit gr&ouml;sse. Im falle des schon genannten AX Registers
+nennt man die beiden Teile AH und AL. Zu den Allzweckregistern z&auml;hlen weiterhin BX, CX und DX.
+Die Register lassen sich als ganzes oder getrennt in High- und Low-Teil bearbeiten.
+Erkl&auml;rung der einzelnen Allzweckregister:<BR><BR>
+
+a) Das AX Register:<BR>
+Der Akkumulator (AX Register) wird bei arithmetischen Operationen eingesetzt. Es muss auch bei
+der Multiplikation und Division verwendet werden.<BR><BR>
+
+b) Das BX Register:<BR>
+Das Base (BX) Register wird bei Speicherzugriffen als Zeiger verwandt.<BR><BR>
+
+c) Das CX Register:<BR>
+Das Count (CX) Register wird zum Beispiel in Schleifen eingesetzt. Beispiel: Eine Schleife mit 
+dem Befehl LOOP wird so lange wiederholt, bis CX = 0 ist.<BR><BR>
+
+d) Das DX Register:<BR>
+Das Data (DX) Register dient zum Beispiel zur Aufnahme von Daten bei 16 Bit Multiplikationen
+und Divisionen.<BR><BR>
+
+
+<u>2. Segmentregister:</u><BR>
+Bei den Segmentregistern handelt es sich um die Register CS (Codesegmentregister), DS 
+(Datensegmentregister), SS (Stacksegmentregister) und ES (Extrasegmentregister). 
+Diese Register werden dazu ben&ouml;tigt, die 1 MB Speicher im Real Mode anzusprechen. Mit den 
+CPU internen 16 Bit Registern kann man jedoch nur 65536 Byte ansprechen, um ein MB anzusprechen 
+w&auml;re ein 20 Bit Register notwendig, das man damals aber aus technischen Gr&uuml;nden nicht bauen 
+konnte. Daher muss man einen Trick verwenden: Man unterteilt das eine MB in Segmente von 
+minimal 16 Byte. Mit einem 16 Bit Register kann man Adressen bis 65536 verwalten, da die 
+Segmente mindestens 16 Byte gross sind ergibt sich 65536 mal 16 = 1 Megabyte ! 
+Die Segmentadresse gibt also ein Speicherabschnitt (Segment) innerhalb des 1 MB Adressraumes an. 
+Innerhalb dieser Segmente bewegt man sich mit Hilfe der Offsetadresse. Die Offsetadresse kann 
+wiederum nur maximal 65536 gross sein d.h. die maximale Segmentgr&ouml;sse ist 65536 Byte (64 KB). 
+So l&auml;sst sich jede Adresse im physikalischen Speicher durch Angabe der Segment- und der 
+Offsetadresse eindeutig beschreiben. Der Prozessor kann aus diesem Adresspaar (man nennt das 
+Segment-Offset Adresspaar logische Adresse) die 20 Bit physikalische Adresse (also die
+tats&auml;chlichen Speicherstelle) berechnen. <BR>
+Dies geschieht durch Multiplikation der Segmentadresse mit 10h (das h steht f&uuml;r Hexadezimal, 
+mehr dazu sp&auml;ter 10h=16) und nachfolgender Addition der Offsetadresse.<BR>
+Beispiel:<BR>
+Gegeben sei die physikalische Adresse F2003h. Diese Adresse l&auml;sst sich logisch z.B. so
+darstellen: F200h:0003h die Schreibweise ist also: Segmentadresse:Offsetadresse.
+Rechnet man die logische Adresse noch obiger Regel um, so erh&auml;lt man F2003h. Umgekehrt ist
+dies allerdings nicht eindeutig m&ouml;glich. Man kann allerdings zur Umrechnung einer physikalischen
+Adresse in eine logische folgenden Trick anwenden: Man fasst die ersten 4 Ziffern zur 
+Segmentadresse zusammen und bildet aus der letzten Ziffer durch voranstellen dreier Nullen
+die Offsetadresse.<BR><BR>
+
+<u>3. Zeige und Index Register:</u><BR>
+Hier gibt es die Register SI, DI, BP, SP, und IP. Sie lassen sich nur als 16 Bit Register 
+ansprechen.<BR><BR>
+
+a) Der Source Index (SI)<BR>
+Wenn man z.B. einen String (Zeichenkette) verschieben m&ouml;chte, so muss dieser Register
+als Zeiger auf den Anfang des Strings dienen (in einem vorgegebenen Segment).<BR><BR>
+
+b) Der Destination Index (DI)<BR>
+Im obigen Fall w&uuml;rde dieses Register das Ziel des zu kopierenden Strings beinhalten.<BR><BR>
+
+c) Der Basepointer (BP)<BR>
+Er wird zum Beispiel verwendet um auf das Stacksegment zuzugreifen.<BR><BR>
+
+d) Der Stackpointer (SP)<BR>
+Der Stackpointer zeigt stets auf die Aktuelle Position im Stacksegment. Der Stack (Stapel) bzw.
+das Stacksegment wird zur Zwischenspeicherung von Werten benutzt. Zum Teil verwenden bestimmte 
+Prozessorbefehle den Stack (z.B. CALL), aber auch der Benutzer kann den Stack mittels der 
+Befehle push und pop verwenden. PUSH schiebt einen Wert auf den Stack POP holt ihn zur&uuml;ck.
+Die Daten werden auf dem Stack nach dem Last in - First out (LIFO) Prinzip gespeichert.<BR>
+Den Befehl, den Sie als letzten gesichert (gepusht) haben, bekommen sie beim poppen als erster
+wieder heraus. Beispiel: Ich will die Register ax und bx auf dem Stack speichern, und danach
+beide Register, die vielleicht inzwischen ver&auml;ndert wurden, wieder korrekt herstellen.
+Dazu wird folgender Code verwendet:<BR><BR>
+
+    push ax    ;speichern von ax<BR>
+    push bx    ;speichern von bx<BR>
+    .          ;Die Punkte stehen f&uuml;r irgendwelche Befehle<BR>
+    .          ;Mit einen ; werden Anmerkungen gekennzeichnet !<BR>
+    .   <BR>
+    pop  bx    ;letztgespeicherter Wert in bx<BR>
+    pop  ax    ;erstgespeicherter Wert in ax<BR>
+<BR>
+Sp&auml;ter werde ich noch einmal auf den Stack eingehen !<BR>
+<BR>
+e) Der Instruction Pointer (IP)<BR>
+Der Instructoin Pointer zeigt immer auf die momentane Position im Codesegment. Man kann ihn
+nicht direkt ver&auml;ndern, die Verwaltung &uuml;bernimmt der Prozessor.<BR><BR>
+
+<u>4. Das Flagregister</u><BR>
+Das Flagregister ist 16 Bit breit. Es ist als ein Statusregister zu verstehen, und in einzelne
+Flags unterteilt. Ein Flag kann also entweder gesetzt sein (also = 1) oder nicht (also = 0).
+Es gibt folgende Flags:<BR>
+Das Carry-Flag CF (es wird bei einem &Uuml;berlauf gesetzt oder bei Fehlern), das Auxillary
+Flag, das Overflow-Flag, das Sign Flag (es wird f&uuml;r Vorzeichenzahlen genutzt), das Parity
+Flag, das Direction Flag, das Interrupt Flag, das Trap Flag und das Zero Flag ZF (Das Zero Flag
+zeigt nach einer Operation an, ob das Ergebnis null ist oder nicht).<BR>
+Manche dieser Flags sind relativ unwichtig, auf andere werde ich sp&auml;ter eingehen.
+<BR><BR>
+Zusatzbemerkung: Oben kann man vielleicht den Eindruck haben, dass die Register nur für 
+bestimmte Zwecke gut sind. Das ist nicht so. Hier herrscht frohe Anarchie. So kann man zum 
+Beispiel weil einem danach ist und weil es irgendwie passt den Aktuellen Treibstoffverbrauch
+eines virtuellen Autos in BP (also dem Basepointer) speichern. Das geht gut. Die 
+Allzweckregister sind sowieso f&uuml;r alles gut und die anderen auch, bis auf folgende
+Ausnahmen: SP sollte nicht direkt ver&auml;ndert werden, IP geht gar nicht direkt, das Flagregister 
+auch nicht.<BR>
+Die Segmentregister sollten besser Segmentadressen enthalten und sonst nichts.<BR>
+Ja nat&uuml;rlich ich weiss LOOP nimmt seinen Counter nun mal nur in CX usw. aber das kommt noch
+und sollte niemanden davon abhalten den Treibstoffverbrauch in BP zu speichern (zumindest im 
+allerschlimmsten Notfall)<BR>
+<BR> 
+<BR>                                              
+So das w&auml;re f&uuml;rs Erste genug. Als n&auml;chstes werde ich kurz auf <a href="binhex.htm"> Hexadezimale und Bin&auml;re</a>
+Zahlen eingehen.<BR>
+<BR>
+<center>
+<a href="index.html">Zur&uuml;ck</a>   <a href="binhex.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</font></p>
+</body>

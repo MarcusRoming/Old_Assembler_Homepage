@@ -1,0 +1,157 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+<pre>
+<b>NOP</b>
+Null Operation. Ausser IP wird nichts ver&auml;ndert. [90]
+
+<b>NOT</b>
+Invertiert alle Bits im Operanden: 0 --> 1 ; 1 --> 0
+<i>Beispiel:</i>
+mov ah,10010100b  ;ah=10010100b
+not ah            ;ah=01101011b
+
+<b>OR</b>
+Logische ODER-Verkn&uuml;pfung: Der Zieloperand wird bitweise mit dem Quelloperand verkn&uuml;pft.
+OR Ziel,Quelle. Das Ergebnis wird im Zieloperand abgelegt.
+<i>Beispiel:</i>
+mov ah,10010100b  ;ah=10010100b
+mov al,10110101b  ;al=10110101b
+or  ah,al         ;ah=10110101b
+
+<b>OUT</b>
+Ausgabe eines Bytes oder Words an eine Portadresse: OUT Portadresse,AX bzw. AL.
+Wenn die Portadresse gr&ouml;sser als 255 ist muss der Wert in DX stehen sonst kann der als 
+Direktwert angegeben werden.
+<i>Beispiel:</i>
+mov  al,´%´
+out  60h,al      ;Schreibt das Zeichen % in den Tastaturpuffer (Adresse 60h)
+
+<font size=4 color=red><b>!</b></font><b>POP</b>
+Der Befehl POP holt den letztgespeicherten WORD Wert vom Stack und erh&auml;ht danach den
+Stackpointer um den Wert 2.
+<i>Beispiel:</i>
+push ax   ;ax sichern
+pop  ax   ;ax holen
+
+<b>POPF</b>
+Holt analog zum Befehl POP das Statusregister, d.h. die Flags vom Stack.
+<i>Beispiel:</i>
+pushf   ;Flags sichern
+popf    ;Flags holen
+
+<font size=4 color=red><b>!</b></font><b>PUSH</b>
+PUSH verringert den Stackpointer um 2 und Speichert ein WORD auf dem Stack.
+<i>Beispiel:</i>
+push  es  ;es sichern
+pop   ds  ;Gesicherten Wert nach ds
+
+<b>PUSHF</b>
+Speichert analog zum Befehl PUSH das Statusregister, d.h. die Flags auf dem Stack.
+<i>Beispiel:</i>
+pushf   ;Flags sichern
+popf    ;Flags holen
+
+<b>REP</b>
+REP wiederholt (REPeat) den nachfolgenden Stringbefehl bis CX gleich null ist. REP decrementiert 
+selbst&auml;ndig. Es existieren folgende Varianten des Befehls: REPE/REPZ wiederhole bis
+CX = 0 und ZF = 1 ; REPNE/REPNZ wiederhole bis CX = 0 und ZF = 0
+<i>Beispiel:</i>
+Siehe die einzelnen Stringbefehle
+
+<font size=4 color=red><b>!</b></font><b>RET</b>
+RET (RETurn) kehrt aus einem Unterprogramm zur&uuml;ck, welches durch einen CALL - Befehl
+aufgerufen wurde.
+<i>Beispiel:</i>
+.
+.
+call Write        ;Das Unterprogramm Write aufrufen
+.
+.
+Write  PROC  Near ;Deklaration des Unterprogramms
+mov  ah,09h       ;Beispielcode
+int  21h
+ret               ;Zurück
+Write  ENP        ;Ende der Prozedur
+[C3;CB;C2;CA]
+
+<b>STC</b>
+STC setzt das Carry Flag auf 1 (SeT Carry flag).
+<i>Beispiel:</i>
+clc   ;CF = 0
+stc   ;CF = 1
+
+<b>STD</b>
+Setzt das Direction Flag, dadurch verlaufen alle Stringoperationen von rechts nach links zur
+kleineren Adresse hin.
+
+<b>STI</b>
+Mit STI (SeT Interrupt flag) werden die Interrups die mit CLI gesperrt wurden wieder zugelassen.
+Siehe auch CLI.
+
+<b>STOS</b>
+STOSB &uuml;bertr&auml;gt den Inhalt von AL in einen durch ES:DI adressierten Speicherbereich.
+STOSW &uuml;bertr&auml;gt den Inhalt von AX. Mit REP k&ouml;nnen mehrere Daten &uuml;bertragen werden. 
+
+<b>SUB</b>
+SUB Ziel,Quelle subtrahiert den Inhalt des Quelloperanden vom Zieloperanden. Das Ergebnis wird
+im Zieloperanden abgelegt.
+<i>Beispiel:</i>
+mov  ah,100      ; ah=100
+sub  ah,25       ; ah=75
+mov  ah,99       ; ah=99
+mov  al,09       ; al=9
+sub  ah,al       ; ah=90
+
+<b>TEST</b>
+TEST verkn&uuml;pft den Zieloperanden bitweise mit dem Quelloperanden durch eine UND Verkn&uuml;pfung. 
+Das Ergebnis wird nicht abgespeichert, sondern ver&auml;ndert nur das Statusregister.
+<i>Beispiel:</i>
+Man will pr&uumL;fen, ob das Bit 6 von ah gleich eins oder null ist:
+test ah,01000000b
+je   Label1       ;Springe wenn Bit 6 = 1
+jne  Label2       ;Springe wenn Bit 6 = 0
+
+<b>XCHG</b>
+Tauscht den Inhalt eines Registers mit einem anderem Register oder einem Speicherplatz.
+<i>Beispiel:</i>
+mov   ax,70h     ; ax=70h
+mov   bx,40h     ; bx=40h 
+xchg  ax,bx      ; eXCHanGe: Austauschen der Inhalte ==> ax = 40h  bx = 70h
+
+<font size=4 color=red><b>!</b></font><b>XOR</b>
+Logische XOR-Verkn&uuml;pfung: Der Zieloperand wird bitweise mit dem Quelloperand verkn&uuml;pft.
+XOR Ziel,Quelle. Das Ergebnis wird im Zieloperand abgelegt.
+<i>Beispiel:</i>
+mov ah,10010100b  ;ah=10010100b
+mov al,10110101b  ;al=10110101b
+xor ah,al         ;ah=00100001b
+
+xor ax,ax         ;ax=0 (Schneller als mov ax,00)</pre>
+
+
+Weiter geht es mit einem <a href="asm5.htm">Programm</a>.
+
+<center>
+<a href="asm3.htm">Zur&uuml;ck</a>   <a href="asm5.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</pre></font></p>
+</body>

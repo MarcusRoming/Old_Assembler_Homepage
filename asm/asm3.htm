@@ -1,0 +1,340 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+<b>==&gt;</b>
+Die f&uuml;r den Anfang besonders wichtigen Befehle wurden mit einem roten "<font size=3 color=red><b>!</b></font>" versehen!
+Die Liste wurde um einige Opcodes ergänzt, welche in der Regel am Ende der Beschreibung in 
+eckigen Klammern stehen. Hat ein Befehl mehr als ein Opcode, dann werden diese mit einem ; 
+getrennt. Alle Opcodes sind Hex-Werte! (Ein Opcode ist quasi der übersetzte Assembler Befehl)
+
+<pre><b>ADD</b>
+Addiere beide Operanden und lege das Ergebnis in den Ersten.
+<i>Beispiel:</i>
+mov  ah,7
+mov  bh,3
+add  bh,ah   ;bh = 10
+
+<b>AND</b>
+Logische UND-Verkn&uuml;pfung: Der Zieloperand wird bitweise mit dem Quelloperand verkn&uuml;pft.
+AND Ziel,Quelle. Das Ergebnis wird im Zieloperand abgelegt.
+<i>Beispiel:</i>
+mov ah,10010100b  ;ah=10010100b
+mov al,10110101b  ;al=10110101b
+and ah,al         ;ah=10010100b
+
+<font size=4 color=red><b>!</b></font><b>CALL</b>
+Aufruf eines Unterprogramms. Der IP wird auf dem Stack gespeichert, dann wird der IP
+mit der Adresse des CALL-Befehls geladem, RET kehrt vom Unterprogramm zur&uuml;ck.
+<i>Beispiel:</i>
+.
+.
+call Write        ;Das Unterprogramm Write aufrufen
+.
+.
+Write  PROC  Near ;Deklaration des Unterprogramms
+mov  ah,09h       ;Beispielcode
+int  21h
+ret               ;Zurück
+Write  ENP        ;Ende der Prozedur
+
+CALL ist das Gleiche wie CALL NEAR.
+Mit CALL FAR Kann man Prozeduren aufrufen, die nicht im selben Segment liegen.
+Bei CALL FAR muss man RETF verwenden.
+[E8;FF;9A]
+
+<b>CLC</b>
+Clear Carry Flag d.h. CF = 0. Das Carry Flag wird oft als Schalter verwendet, 
+z.B  um Fehler in einem Unterprogramm anzuzeigen. Mit CLC kann das Carry vorher
+gel&ouml;scht werden. 
+
+<b>CLD</b>
+Clear Direction Flag: Setzt das Direction Flag auf 0. Damit erfolgen alle 
+Stringoperationen (z.B. stosb) von links nach rechts (default!!).
+
+<b>CLI</b>
+L&ouml;sche das Interruptflag. Die extern maskiebaren Interrups werden gesperrt.
+D.h. es werden z.B Interrupts die vom Keyboard oder von der Maus erfolgen gesperrt.
+Dies ist vor allem dan erforderlich, wenn Zeitkritische Operationen ablaufen, die nicht
+gest&ouml;rt werden sollen.
+
+<font size=4 color=red><b>!</b></font><b>CMP</b>
+Mit CMP werden zwei Operanden verglichen. Die Operanden m&uuml;ssen gleich gross sein,
+d.h. entweder Byte/byte oder Word/word. Das Ergebnis des Vergleichs kommt ins Statusregister.
+<i>Beispiel:</i>
+mov ax,0FFFFh
+cmp ax,Var1
+je  Gleich       ;Wenn gleich springe zum Label Gleich
+jg  Gr&ouml;sser ;Wenn gr&ouml;sser springe zum Label Gr&ouml;sser
+jl  Kleiner      ;Wenn kleiner springe zum Label Kleiner
+[3A;3B;3C;3D;38;39;80;81;83]
+ 
+<b>CMPS</b>
+CMPSB (Compare Strings Bytes) / CMPSW (Compare Strings Words)
+Mit dem Befehl REP /REPNE k&ouml;nnen mehrere Daten verglichen werden. 
+Der Befehl CMPS vergleicht zwei Strings miteinander, wobei der erste Operand &uuml;ber 
+das Registerpaar DS:SI  und der zweite Operand &uuml;ber ES:DI adressiert wird. Nach dem
+Vergleich werden SI und DI automatisch erh&ouml;ht oder bei gesetztem Direction Flag erniedrigt.
+Das Ergebnis des Vergleichs kommt ins Statusregister.
+<i>Beispiel:</i>
+lea  di,String1      ;Wenn di auch im Datensegment einfach ES=DS z.B. so: push ds  pop es
+lea  si,String2      ;lea si,String2 entspricht mov si,OFFSET String2 
+mov  cx,12           ;Anzahl der Wiederholungen von REP
+rep  cmpsb           ;Vergleichen
+je   Weiter          ;Springen wenn gleich
+
+<font size=4 color=red><b>!</b></font><b>DEC</b>
+Decrementieren um 1. D.h. es wird 1 vom Operanden subtrahiert.
+Gegenteil: INC.
+<i>Beispiel:</i>
+mov  ah,09h
+dec  ah     ;ah=08h
+
+Oder als LOOP Ersatz (glaub sogar schneller):
+
+           mov  cx,4
+Schleife:  
+           dec  cx
+           .
+           .
+           jnz  Schleife
+
+Oder um eine Variable zu Dekrementieren:
+dec  Var1
+ 
+<b>DIV</b>
+Dividiert AX bzw. das Registerpaar DX:AX durch den Divisor.
+
+Divident    /   Divisor         =  Quotient     Rest
+AX (16 Bit) /  Operand (8 Bit)  =    AL           AH
+DX:AX       /  Operand (16 Bit) =    AX           DX
+
+<i>Beispiel:</i>
+mov ax,300    ;AX = Divident
+mov bh,12     ;bh = Divisor
+div bh        ;AX/BH = AL(Quotient)  AH(Rest)
+
+
+<b>HLT</b>
+Der Befehl HLT (HaLT) h&auml;lt den Prozessor an bis ein Interrupt erfolgt.
+
+<b>IN</b>
+In liest ein Byte oder Word aus einem Port in al oder ax ein.
+<i>Beispiel:</i>
+in  al,60h   ;Byte vom Tastaturpuffer in al lesen
+
+<b>INC</b>
+Addiert (Incrementiert) den Operanden um 1.
+<i>Beispiel:</i>
+mov  ax,07h
+inc  ax      ;ax=08h
+inc  Var1    ;Incrementieren einer Variablen im Speicher
+
+<font size=4 color=red><b>!</b></font><b>INT</b>
+L&ouml;st einen Interrupt aus. Wenn ein Interrupt &uuml;ber den INT Befehl ausgel&ouml;st wird
+passieren zwei Dinge:
+1. Das Flagregister wird auf den Stack gepusht
+2. Ein FAR CALL wird ausgel&ouml;st zu der Segment:Offset Adresse die sich in der 
+   Interruptvektor-Tabelle befindet (dort umgekehrt abgespeichert Offset:Segment).
+   Bei dieser Adresse befindet sich der Code des Interrupts. Die R&uuml;ckkehr ins
+   Programm erfolgt durch einen IRET Befehl.
+[CD; Speziell Int 3: CC]
+ 
+Diese Tabelle besteht aus 256 Doppelw&ouml;rtern und reicht von 0000:0000 bis 0000:0400h.
+Die Offset-Adresse der Interruptvektoren kann man errechnen indem man die Interruptnummer 
+mit 4 multipliziert. Die Segmentadresse ist immer 0000h. So ist z.B. die Adresse f&uuml;r den
+Interrupt 21h in der Tabelle an der Stelle 21h*4 = 84h also 0000:0084h.
+    
+<b>IRET</b>
+R&uuml;ckkehr aus einer Interruptroutine. CS:IP und das Statusregister (Flags) wird
+vom Stack genommen.
+
+<font size=4 color=red><b>!</b></font><b>JMP</b>
+Unbedingter Sprung zur angegebenen Adresse bzw. Label.
+JMP FAR kann auch zu Zielen springen, die nicht im eigenen Segment liegen.
+<i>Beispiel:</i>
+        jmp   Weiter
+           . 
+           .
+           .
+Weiter:
+[EB;E9;FF;EA]
+
+
+<font size=4 color=red><b>!</b></font><b>Bedingte Spr&uuml;nge:</b>
+JE/JNE/JZ/JNZ/JC/JNC/JG/JL/JLE/JGE/JNLE/JNGE sind wichtige bedingte Spr&uuml;nge.
+Sie werden nur ausgef&uuml;hrt, wenn eine bestimmte Bedingung erf&uuml;llt ist.
+JE: Jump if equal. Springe wenn gleich.
+<i>Beispiel:</i>
+cmp  ax,Var1    ;vergleicht die Variable Var1 und ax indem beide subtrahiert werden.
+je   Gleich     ;Sind sie gleich gross, ist das Ergebnis 0 und das Zero Flag wird
+                ;gesetzt. JE pr&uuml;ft dieses Flag und springt wenn es gesetzt also 1 ist. 
+
+JE  : Jump if equal. Springe wenn gleich. [74;0F84]
+JNE : Jump if not equal. Springe wenn nicht gleich.  [75;0F85]
+JZ  : Jump if zero. Springe wenn 0. Eigentlich das Gleiche wie JE, es hat sogar den gleichen
+     Opcode, d.h. es wird in die gleiche Zeichenfolge &uuml;bersetzt. Aber: &Uuml;bersichtlicher
+     wenn man nicht nur eins verwendet. [74;0F84]
+JNZ : Jump if not zero. Springe wenn nicht 0. [75;0F84]
+JC  : Jump if Carry. Springe wenn Carry Flag gesetzt. [72;0F82]
+JNC : Jump if not Carry. Springe wenn Carry Flag nicht gesetzt. [73;0F83]
+JG  : Jump if greater. Springe wenn gr&ouml;sser. [7D;0F8D]
+JNG : Jump if not greater. Springe wenn nicht gr&ouml;sser. [7E;0F8E]
+JL  : Jump if less. Springe wenn kleiner. [7C;0F8C]
+JNL : Jump if not less. Springe wenn nicht kleiner. [7D;0F8D]
+JLE : Jump if less-equal. Springe wenn kleiner oder gleich.
+JGE : Jump if greater-equal. Springe wenn gr&ouml;sser gleich.
+JNLE: Jump if not less-equal. Springe wenn nicht kleiner oder gleich.
+JNGE: Jump if not grater-equal. Springe wenn nicht gr&ouml;sser oder gleich.
+
+Bedingte Spr&uuml;nge haben lediglich eine Reichweite von -128 bzw. +127 Bytes. Es kann
+daher schnell passieren, dass ein Ziel ausserhalb der Reichweite liegt. In diesem Fall
+meldet der Assembler einen Fehler der wie folgt behoben werden kann:
+
+Wenn es so nicht geht:
+
+Anfang:
+           .
+           .      ;&Uuml;ber 128 Bytes Programmcode
+           .
+          cmp  ax,00h
+          je   Anfang   ;Sprungziel zu weit entfernt. --> Fehler
+          mov  bx,40h
+
+Dann geht es so:
+
+Anfang:         
+           .
+           .      ;&Uuml;ber 128 Bytes Programmcode
+           .
+          cmp  ax,00h
+          jne  Weiter1   ;Sprungziel zu weit entfernt. --> Fehler
+          jmp  Anfang
+Weiter1:  mov  bx,40h
+
+        
+<font size=4 color=red><b>!</b></font><b>LEA</b>
+LEA Ziel,Quelle (Load Effective Address). LEA berechnet den Offset und speichert das Ergebnis
+im Zieloperand, d.h. im angegebenen Register.
+<i>Beispiel:</i>
+lea  dx,String1
+mov  dx,OFFSET String ;hat fast den selben Effekt, LEA ist besser.
+
+<b>LODS</b>
+L&auml;dt &uuml;ber das DS:SI Register ein Byte in das AL Register (LODSB) oder ein Wort
+in das AX Register (LODSW). Danach wird das Si Register entsprechend (Byte oder Word) um
+1 oder 2 erh&ouml;ht ist das Direction-Flag gesetzt wird es erniedrigt.
+
+
+<font size=4 color=red><b>!</b></font><b>LOOP</b>
+Loop springt zur angegebenen Adresse bis das CX Register null ist. Loop subtrahiert vom
+CX Register 1 und &uuml;berpr&uuml;ft CX auf null. Ist CX nicht null springt LOOP zur angegebenen
+Adresse, wenn LOOP null ist wird das Programm mit dem n&auml;chsten Befehl fortgeführt. 
+<i>Beispiel:</i>
+           mov  cx,11   ;Die Schleife wird 11 mal durchlaufen
+DoLoop:    
+           nop          ;zu wiederholende Befehle hier: NOP
+           
+           Loop  DoLoop
+
+
+<b>LOOPE-LOOPZ</b>
+Springt zur angegebenen Adresse, wenn CX ungleich null ist und das Zero-Flag gesetzt ist.
+<i>Beispiel:</i>
+          mov  cx,11   ;Die Schleife wird max. 11 mal durchlaufen
+DoLoop:    
+           nop          ;zu wiederholende Befehle hier: NOP
+           cmp  ax,Var1
+           Loope DoLoop ;Springe wenn cx ungleich null und ax und Var1 gleich
+
+<b>LOOPNE-LOOPNZ</b>
+Springt zur angegebenen Adresse, wenn CX ungleich null ist und das Zero-Flag nicht gesetzt ist.
+<i>Beispiel:</i>
+          mov  cx,11   ;Die Schleife wird max. 11 mal durchlaufen
+DoLoop:    
+           nop          ;zu wiederholende Befehle hier: NOP
+           cmp  ax,Var1
+           Loope DoLoop ;Springe wenn cx ungleich null und ax und Var1 ungleich
+
+
+<font size=4 color=red><b>!</b></font><b>MOV</b>
+Der Befehl MOV Ziel,Quelle (engl. move bewegen) &uuml;berträgt ein Byte oder Word vom 
+Quelloperanden in den Zieloperanden. Der Quelloperand selbst wird nicht ver&auml;ndert.
+Quell und Zieloperand m&uuml;ssen gelich gross sein, etwas wie z.B. mov al,cx funktioniert
+nicht. Auch kann man mit MOV nicht die Register CS, IP und das Flagregister nicht ver&auml;ndern.
+<i>M&ouml;gliche Operandenkombinationen:</i>
+
+mov  Reg,Reg         Bsp: mov  cx,ax     
+mov  Reg,Seg. Reg    Bsp: mov  ax,ds
+mov  Reg,Mem         Bsp: mov  cx,Variable
+mov  Reg,Wert        Bsp: mov  bx,40h
+mov  Seg. Reg,Reg    Bsp: mov  es,cx
+mov  Seg. Reg,Mem    Bsp: mov  ss,old_ss
+mov  Mem,Reg         Bsp: mov  Variable,ax
+mov  Mem,Seg. Reg    Bsp: mov  Var,es
+mov  Mem,Wert        Bsp: mov  Var2,12
+
+Abk.: Reg=CPU Register, Seg. Reg=Segment-Register, Mem=Memory(Speicher) 
+
+<b>MOVS</b> 
+MOVSB (MOVe String, Byte) bzw. MOVSW (MOVe String, Word) &uuml;bertr&auml;gt ein Byte oder Word
+das durch DS:SI adressiert wird nach ES:DI, MOVS stellt also eine Kombinatiom von LODS und STOS
+dar. Nach jeder &Uuml;bertragung werden SI und DI je nach Direction Flag erh&ouml;ht (default) oder 
+erniedrigt (je nach Direction Flag - siehe auch STD bzw. CLD). Mit REP k&ouml;nnen mehrere Daten
+kopiert werden.
+<i>Beispiel:</i>
+lea  si,Quelle  ; Woher kopieren ?
+lea  di,Ziel    ; Wohin kopieren (vorher es setzen)
+mov  cx,Laenge  ; Wieviel kopieren ?
+rep  movsb      ; Kopieren
+
+<b>MUL</b>
+MUL Multipliziert den vorzeichenlosen Wert des Operanden mit dem vorzeichenlosen Wert im 
+Akkumulator miteinander. Man unterscheidet zwischen Byte und Word Multiplikation.
+
+<i>Byte Multiplikation:</i>
+Der erste Wert muss sich im AL Register befinden, der andere wird hinter MUL angegeben und muss
+sich in einem 8 Bit Register oder einer Byte Speicherstelle befinden. Das Ergebnis wird in AX 
+abgelegt.
+
+<i>Beispiel:</i>
+mov  bl,10
+mov  al,8
+mul  bl     ;==> ax = 80
+ 
+mov  al,20
+mov  Var1,20
+mul  Var1   ;==> ax = 400
+
+<i>Word Multiplikation:</i>
+Ein Operand muss sich im AX Register befinden, der andere in einem 16 Bit Register oder einer
+Word Speicherstelle. Der High-Teil des Ergebnisses wird in DX abgelegt, der Low-Teil in AX.
+
+<i>Beispiel:</i>
+mov  ax,350
+mul  ax     ;DX:AX = AX * AX
+</pre>
+
+<a href="asm4.htm">Weiter</a> zu Teil 2.
+<center>
+<a href="asm2.htm">Zur&uuml;ck</a>   <a href="asm4.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</pre></font></p>
+</body>

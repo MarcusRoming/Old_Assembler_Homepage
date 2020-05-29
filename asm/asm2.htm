@@ -1,0 +1,171 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+Definition: Assembleranweisungen.<BR>
+Eine Anweisungszeile weist den Assembler an, etwas zu tun, was mit der Erzeugung von Befehlen 
+nichts zu tun hat. Die Anweisungen sind z.B. zur Deklaration von Daten und Datenstrukturen da,
+oder beeinflussen die Arbeitsweise des Assemblers.<BR>
+<BR>
+<BR>
+<u>1. Format einer Assembler-Zeile:</u><BR>
+<BR>
+[Label] [Befehl/Anweisung] [Operanden] [;Kommentar]<BR>
+<BR>
+Die eckigen Klammern sollen zeigen, dass die aufgef&uuml;hrten Komponenten optional sind, man
+kann sie also auch weglassen. Der Abstand zwischen den einzelnen Komponenten kann beliebig
+gross sein (>0), er sollte jedoch aufgrund der besseren &Uuml;bersichtlichkeit nicht zu gross
+gew&auml;hlt werden. Auch sollten die Spalten einheitlich gestaltet werden. 
+<BR>
+<BR>
+<u>2. Das Label:</u><BR>
+Das Label kennzeichnet Variablen, Werte und Sprungziele. Beim assemblieren werden die Labels
+in Adressen umgesetzt. <BR>
+<BR>
+Beispiele:<BR> 
+<pre>
+Var1  dw  ?  ;Anlegen einer Variable, von 2 Byte (dw = define Word) Var1 steht f&uuml;r die 
+             ;Adresse, an der der Assembler den Platz f&uuml;r die Variable Var1 reserviert.  
+
+
+Beenden:                     ;Diese Label dient als Spungziel, es ben&ouml;tigt daher am 
+             mov  ah,4Ch     ;Ende ein Doppelpunkt
+             int  21h        
+</pre>
+<BR>
+<u>3. Variablen und Konstanten.</u><BR>
+Variablen kommen normalerweise in das Datensegment. Nur in COM Dateien, die ich sp&auml;ter noch 
+erkl&auml;ren stehen sie im Codesegment. Variablen sind mindestens ein Byte gross bzw. das 
+ganzzahlige Vielfache eines Bytes, also z.B. ein Wort (2 Byte) oder ein Doppelwort.<BR>
+Durch die Assembleranweisungen DB (define Byte), DW (define Word), DD (define Doubleword) ,
+DQ (define Quadword) und DT (define Tennbytes) kann man Speicherplatz im Datensegment 
+reservieren. Dieser kann dann &uuml;ber den Variablennamen angesprochen werden.
+Beispiel:<BR>
+<pre>
+Im Datensegment:
+Variable1    DB   40h   ;Variable1 ist mit dem Wert 40h vorbelegt.
+
+Im Codesegment:
+mov ah,Variable1        ;Den Inhalt der Variablen nach ah schieben.
+
+mov dx,OFFSET Variable1 ;Die Offsetadresse der Variablen nach dx schieben.
+</pre>
+a) Uninitialisierte Variablen.<BR>
+Oft bekommt eine Variable erst im Verlauf des Programmes einen Wert und muss daher nicht mit
+einem Wert vorbesetzt werden. Um eine solche uninitialisierte Variable zu erstellen, setzt
+man anstelle des Wertes ein Fragezeichen :<BR>
+<BR>
+Variable2  DB ?  ;reserviert ein uninitialisiertes byte.<BR>
+<BR>
+<BR>
+b) Zeichenketten oder Strings.<BR>
+Zeichenketten beinhalten zum Beispiel den Text, der auf den Bildschirm ausgegeben wird, oder 
+in eine Datei geschrieben wird. Da ein Zeichen ein Byte ben&ouml;tigt, verwendet man DB.
+Der String selbst steht in zwei " oder ´.<BR>
+Siehe auch vorherige Seite!<BR>
+<BR>
+Beispiel:<BR>
+<pre>
+Text1  DB "So geht´s "
+Text2  DB ´Und "so" auch´
+Text3  DB "So "aber" nicht"        ;&lt;-- Fehler !!
+Text4  DB ´So geht´s auch nicht´   ;&lt;-- Fehler !!
+</pre>
+<BR>
+c) Zahlen.<BR>
+Nat&uuml;rlich k&ouml;nnen Variablen auch numerische Werte haben.<BR>
+So erzeugt zu Beispiel die folgende Assembleranweisung<BR>
+<pre>
+Zahlen   DB 1,2,3,4,5,6 
+</pre>
+einen 6 Bytes langen Speicherbereich, wobei das erste Byte den Wert 1 hat, das zweite Byte
+den Wert 2 usw.<BR>
+<BR>
+Die Assembleranweisung<BR>
+<pre>
+Zahl  DW  888
+</pre>
+reserviert 2 Bytes und speichert darin die Zahl 888.<BR>
+<BR>
+<BR>
+d) Der DUP-Operator.<BR>
+Um ein Tabelle mit sich wiederholenden Werten zu erstellen, kann man die Assembleranweisung
+DUP verwenden. Um z.B. eine Tabelle mit 12 Nullen zu erzeugen, kann man entweder schreiben:
+<pre>
+Tabelle1  DB 0,0,0,0,0,0,0,0,0,0,0,0
+</pre><BR>
+Oder aber viel k&uuml;rzer:<BR>
+<pre>
+Tabelle1  DB 12 DUP (0)
+
+Weitere Beispiele:
+
+Tabelle  DB 2 DUP (1,2,3)   entspricht:   Tabelle  DB 1,2,3,1,2,3
+Tabelle  DB 9 DUP (?)       entspricht:   Tabelle  DB ?,?,?,?,?,?,?,?,?
+Tabelle  DW 4 DUP (888)     entspricht:   Tabelle  DW 888,888,888,888  
+</pre>
+<BR>
+e) Konstanten.<BR>
+Konstanten brauchen selbst keinen Speicherplatz, eine Konstante enth&auml;lt einen Wert, der
+im Programm nicht ver&auml;ndert werden kann. Die Konstante wird gew&ouml;hnlich am Anfang 
+definiert. Die Konstante kann dann im Programm anstatt ihres Wertes verwendet werden.<BR> 
+Eine Konstante wird mit der Assembleranweisung EQU definiert: <i>Name EQU Ausdruck</i>.<BR>
+<pre>
+Beispiel:
+
+                      .MODEL SMALL
+                      .STACK 100h
+ 
+;Definition der Konstanten
+    
+Write                  EQU   09h
+Beenden                EQU   4Ch
+ 
+                      .DATA
+Msg                   DB  "Hallo$"
+
+                      .CODE
+                      mov  ax,@data
+                      mov  ds,ax
+                      mov  dx,OFFSET Msg
+                      mov  ah,Write      ;Write=09h !
+                      int  21h
+                      mov  ah,Beenden    ;Beenden=4Ch !
+                      int  21h
+                      END
+
+Auch ist zum Beispiel folgendes m&ouml;glich:
+
+ProgramSize   EQU ProgramEnd - ProgramStart
+</pre>
+Wenn ProgramEnd ein Label am Ende des Programms ist und ProgramStart eines am Anfang,
+den enth&auml;lt ProgramSize die Gesamtl&auml;nge des Programms.<BR>
+Konstanten machen die Wartung des Programmes wesentlich einfacher, da anstatt vieler Werte
+nur einer ge&auml;ndert werden muss. <BR>
+<BR> 
+Weiter geht es mit <a href="asm3.htm">wichtigen Befehlen.</a> <BR>
+Diese sollten Sie in jedem Fall durchlesen, um einen &Uuml;berblick zu gewinnen.
+<BR><BR>
+
+<center>
+<a href="asm1.htm">Zur&uuml;ck</a>   <a href="asm3.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</font></p>
+</body>

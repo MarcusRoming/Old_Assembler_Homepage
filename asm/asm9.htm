@@ -1,0 +1,211 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+Hier werde ich die Interruptfunktionen dir wir bisher gebraucht haben noch einmal auflisten und
+noch einig neue.
+<pre>
+<u><i>Bisherige Funktionen:</i></u>
+
+<b>1. Schreibe Zeichenkette:</b>
+Interrupt 21h Funktion 9
+Eingabe:
+AH = 9
+DS = Segmentadresse der Zeichenkette
+DX = Offsetadresse der Zeichenkette
+--> Ende der Zeichenkette muss durch ein $ signalisiert werden.
+
+<b>2. Zeichen von der Tastatur lesen:</b>
+Interrupt 21h Funktion 7
+Eingabe:
+AH = 7
+Ausgabe:
+AL = ASCII Code des Zeichens
+Wenn AL = 0 ist, dann wurde ein erweiterter Tastaturcode eingelesen,
+Funktion nochmal aufrufen, um eigentlichen Code zu lesen.
+--> Das Zeichen wird nicht angezeigt, die Funktion wartet auf die Eingabe.
+
+<b>3. Zeichen von der Tastatur lesen:</b>
+Interrupt 21h Funktion 8
+Analog zu Funktion 7 kann jedoch durch STRG+C abgebrochen werden.
+
+<b>4. &Ouml;ffnen einer Datei:</b>
+Interrupt 21h Funktion 3Dh.
+Eingabe:
+AH = 3Dh
+AL = Zugriffsmodus (00h = Nur lesen, 01h = Nur schreiben, 02h = Lesen und schreiben)
+DS = Segmentadresse des Dateinamens
+DX = Offsetadresse des Dateinamens
+Ausgabe:
+Carry Flag = 0 --> Ok
+AX = Handle der Datei
+Ist ein Fehler aufgetreten dann Carry Flag = 1 und Fehlercode in AX:
+AX = 1 = Datei schon ge&ouml;ffnet
+AX = 2 = Datei nicht gefunden
+AX = 3 = Pfad nicht gefunden
+AX = 4 = Kein freies Handle
+AX = 5 = Zugriff verweigert
+
+<b>5. Datei erstellen:</b>
+Interrupt 21 Funktion 3Ch
+Eingabe:
+AH = 3Ch
+DS = Segmentadresse des Dateinamens
+DX = Offsetadresse des Dateinamens
+CX = Dateiattribut (00h = Normal, 01h = Schreibschutz, 02h = Versteckt, 04h = System)
+Ausgabe:
+Carry Flag = 0 --> OK
+AX = Handle der Datei  -->D.h. die Datei braucht nicht noch extra ge&ouml;ffnet werden!
+Ist ein Fehler aufgetreten dann Carry Flag = 1 und Fehlercode in AX:
+AX = 1 = Pfad nicht gefunden
+AX = 4 = Kein freies Handle
+AX = 5 = Zugriff verweigert
+--> Falls die angegebene Datei bereits existiert, wird sie ohne Warnung &uuml;berschrieben.
+
+<b>6. Datei schliessen:</b>
+Interrupt 21 Funktion 3Eh
+Eingabe:
+AH = 3Eh
+BX = Handle der Datei
+Ausgabe:
+Carry Flag = 0 --> OK
+Carry Flag = 1 --> Fehler u. Fehlercode in AX (AX = 6 = Ung&uuml;ltiges Handle)
+
+<b>7. Datei lesen:</b>
+Interrupt 21h Funktion 3Fh
+Eingabe:
+AH = 3Fh
+BX = Handle der Datei/des Ger&auml;ts
+CX = Anzahl der zu lesenden Bytes
+DS = Segmentadresse des Puffers
+DX = Offsetadresse des Puffers
+Ausgabe:
+Carry Flag = 0 --> OK und AX = Anzahl der gelesenen Bytes
+Carry Flag = 1 --> Fehler u. Fehlercode in AX:
+AX = 5 = Zugriff verweigert
+AX = 6 = Ung&uuml;ltiges Handle
+--> Der "Zeiger" innerhalb der zu lesenden Datei wird automatisch um den Wert in CX erh&ouml;ht, so
+    dass der n&auml;chste Lesevorgang wieder neue Daten einliest.
+
+<b>8. Datei schreiben:</b>
+Interrupt 21h Funktion 40h
+Eingabe:
+AH = 40h
+BX = Handle der Datei/des Ger&auml;ts
+CX = Anzahl der zu schreibenden Bytes
+DS = Segmentadresse des Puffers
+DX = Offsetadresse des Puffers
+Ausgabe:
+Carry Flag = 0 --> Ok und AX = Anzahl der geschriebenen Bytes
+Carry Flag = 1 --> Fehler u. Fehlercode in AX: 
+AX = 5 = Zugriff verweigert
+AX = 6 = Ung&uuml;ltiges Handle
+--> Auch bei dieser Funktion wird der Zeiger innerhalb der Datei automatisch um den Wert in CX
+    erh&ouml;ht, so dass der n&auml;chste Schreibvorgang hinter dem zuletzt geschriebenen Byte erfolgt. 
+
+<b>9. Programm beenden:</b>
+Interrupt 21h Funktion 4Ch
+Eingabe:
+AH = 4Ch
+AL = Errorlevel (Optional)
+
+<i><u>Neue Funktionen:</i></u>
+
+<b>A. Zeichenkette (String) von der Tastatur lesen:</b>   
+Interrupt 21h Funktion 0Ah
+Eingabe:
+AH = 0Ah
+DS = Segmentadresse des Puffers
+DX = Offsetadresse des Puffers
+--> In das erste Byte des Puffers muss die Maximale Anzahl von Zeichen, 
+    die max. eingelesen werden sollen. In das zweite Byte des Puffers 
+    wird die Anzahl der tats&auml;chlich eingelesenen Zeichen ausgegeben.
+--> Der Puffer sollte so aussehen:
+
+Puffer  DB XXh        ;XX=max. Zeichenanzahl XX < 255.
+        DB ?          ;Eingelesene Zeichen
+String  DB XX DUP (?) ;Eingegebener String              
+
+--> Hier gibt es ein <b>NEUES (!)</b> <a href="streing.asm">Beispiel</a> dazu. 
+
+<b>B. Booten des Systems:</b>
+Interrupt 19h Funktion--
+Eingabe: Einfach nur INT 19h
+--> Funktioniert nur unter True Dos
+
+<b>C. Move Filepointer:</b>
+Interrupt 21h Funktion 42h
+Eingabe:
+AH = 42h
+AL = Position relativ zu
+     0 -> Dateianfang
+     1 -> Aktueller Dateiposition
+     2 -> Dateiende
+BX = Handle der Datei
+CX = High-Word der Position
+DX = Low-Word der Position
+Ausgabe:
+AX = Low-Word der neuen Position
+DX = High-Word der neuen Position
+--> Positioniert den Zeiger innerhalb einer Datei für die nächste Schreib- oder Leseaktion.
+
+<b>D. Keyboard - Check for keystroke:</b>
+Interrupt 16h Funktion 01h
+Eingabe:
+AH = 01h
+Ausgabe:
+Gesetztes Zero-Flag wenn keine Taste gedr&uuml;ckt wurde (Funktion sieht im Tastaturpuffer nach)
+Wenn Taste gedr&uuml;ckt wurde: Zero-Flag clear und ASCII Zeichen in AL.
+--> Gut um z.B. eine Schleife durch Tastendruck zu unterbrechen.  Wie z.B. Turbo-Pascal:  
+    "Repeat until keypressed"
+
+<b>E. Videomodus setzen:</b>
+Interrupt 10h Funktion 00h
+Eingabe:
+AH = 00h
+AL = Videomodus (davon gibt es ziemlich viele, die meisten sind aber kartenspez., viele sind
+     einfach schlecht, deshalb nenn ich nur den Besten: 13h - VGA 320x200 256 Farben. Normaler
+     Modus ist 80x25 d.h. Modus 2 oder 3(Farbig).)
+Ausgabe:
+Keine.
+
+<b>F. Schreibe Grafikpunkt:</b>
+Interrupt 10h Funktion 0Ch
+--> Vorher mit Fkt. 00h grafikmodus setzen.
+Eingabe:
+AH = 0Ch
+CX = Spaltenkoordinate
+DX = Zeilenkoordinate
+AL = Farbattribut
+Ausgabe: Keine
+
+<a href="graph.asm">Beispiel</a> von mir zu den letzten genannten Interrupts (einfach, aber schlecht kommentiert)
+
+Wird Fortgesetzt...
+
+MEHR: Siehe DOS-Technical-Reference / Ralph Browns Interruptliste</pre><br>
+
+Weiter zum einem Neuen Programm! <a href="asmx.htm">Weiter</a> !<BR><BR>
+
+<center>
+<a href="asm8.htm">Zur&uuml;ck</a>   <a href="asmx.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</pre></font></p>
+</body>

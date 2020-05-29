@@ -1,0 +1,193 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+Dieses Programm ersetzt das alte "free" Programm (das wohl nirgendwo mehr funktioniert) und soll vor allem zeigen wie man mit groﬂen Dateien umgeht. Dabei soll von einer Datei die CRC16 errechnet werden. Von der Datei wird zun&auml;chst ein St&uuml;ck in den vorher reservierten Speicher eingelesen und dann davon die CRC brechnet. Dann wird abermals ein St&uuml;ck eingelesen, wobei die CRC mit dem vorherigen Wert weiterarbeitet. So werden so lange Daten eingelesen, bis in AX durch eine 0 signalisiert wird, daﬂ wir alles eingelesen haben. Da mehrfach eingelesen wird, ist die Dateigr&ouml;ﬂe nicht auf 64 kByte begrenzt, sondern kann mehrere MByte betragen. Das Programm benutzt Prozeduren und Makros aus meinem Buch im MITP Verlag und eine CRC16-Prozedur aus dem Buch von G&uuml;nter Born (eine CD).<br> Syntax: CRC16 filename.ext .<br> Schon eine kleine Ver&auml;nderung der Datei an einer beliebigen Stelle, bewirkt eine ganz andere CRC.<BR>
+Das Programm ben&ouml;tigt die Datei macro.inc welche unten als Download bereitsteht!
+<BR><br>
+<u>Programm f&uuml;r eine EXE Datei:</u><BR>
+<pre>
+		.MODEL SMALL
+		.386
+                .STACK 100h
+                .DATA
+Filename        DB 126 DUP (0)		;Kommandozeile
+Segment2        DW  ?
+Puffer1		DB 6 DUP (?)   ;Puffer f&uuml;r das Resultat
+
+;**********************************ANFANG CODE **************************************************
+
+                .CODE
+		include macro.inc
+		CutMem
+                Gettail Filename,Fehler		;Kommandozeile mit Dateiname
+		call InitData1
+                mov  al,00h
+                mov  ah,3Dh
+		mov  dx,OFFSET Filename
+                int  21h			;Datei oeffnen
+		mov  bx,ax
+		jc   Fehler
+					
+		AllocMem 0FFFh
+		mov  [Segment2],ax		;Speicher res.
+		
+		call InitFardata
+		xor  dx,dx
+
+LoopIt:
+		push dx
+		mov  ah,3Fh
+		mov  cx,0EFFFh
+		mov  dx,0
+                int  21h			;Daten einlesen
+		jc   Fehler
+		
+		pop  dx
+
+		cmp  ax,0			;Fertig mit den Daten
+		je   Raus			;bzw. der Datei?
+
+		mov  cx,ax
+		mov  si,0
+
+		call CRC16			;CRC ausrechnen
+		jmp  LoopIt			;N&auml;chste Dateiportion!
+
+Raus:
+		mov  ah,3Eh
+		int  21h
+		
+		push ds
+		pop  es
+		mov  ah,49h
+		int  21h			;Speicher wieder freigeben
+
+		call InitData1
+		push ds
+		pop  es
+		mov  ax,dx
+		call Ausgabe
+
+Fehler:	
+		mov  ah,4Ch
+		int  21h			;Ende Programm
+
+
+InitData1       PROC NEAR
+                push ax
+                mov  ax,@data
+                mov  ds,ax
+		;ASSUME DS:@data
+		pop  ax
+		ret
+InitData1       ENDP
+
+
+InitFardata          PROC NEAR
+                     push ax
+		     mov  ax,[Segment2]		;DS auf Segment 2 
+		     mov  ds,ax
+		     pop  ax
+		     ret
+InitFardata	     ENDP
+
+; -->Aus Buch: Assembler Programmierung - G&uuml;nter Born:
+; Pass    - DS:SI = pointer to the buffer
+;         - CX    = length of the buffer 
+; Returns - DX    = CRC16 of the buffer  
+
+CRC16    PROC NEAR
+
+         PUSH AX
+         PUSH BX
+         PUSHF
+         CLD                      ; Move forward through the buffer
+
+         ;SUB  DX,DX               ; CRC := 0000h ; von mir auskommentiert
+
+C1:      LODSB                    ; AL := byte at DS:SI
+         SUB  AH,AH
+
+         XCHG AH,AL               ; AX := 256 * AL
+         XOR  DX,AX               ; CRC := CRC xor AX
+
+         PUSH CX
+         MOV  CX,8
+
+C2:      MOV  BX,DX
+         SHL  DX,1
+
+         AND  BX,8000h
+         JZ   C3
+
+         XOR  DX,1021h
+C3:      LOOP C2
+         POP  CX
+
+         LOOP C1
+
+         POPF
+         POP  BX
+         POP  AX
+         RET
+CRC16    ENDP
+
+
+;--> Aus Buch: Assembler - Grundlagen der Programmierung, Roming, Rhode:
+Ausgabe  PROC NEAR      ;Ausgabeprozedur
+         pusha          ;Register sichern
+         xor  cx,cx     ;CX=0=Zeichenz&auml;hler
+         mov  di,OFFSET Puffer1+6  ;DI an Pufferende
+         mov  bx,10     ;Nachher durch 10 dividieren
+
+Loop1:   xor  dx,dx     ;DX=0
+         div  bx        ;AX/10, Rest in DX bzw. DL
+         add  dl,30h    ;DL nach ASCII
+         dec  di        ;DI-1
+         mov  [di],dl   ;ASCII Ziffer in Puffer
+         inc  cx        ;CX+1
+         cmp  ax,0      ;Ist AX=0 ?
+         jne  Loop1     ;Springe wenn nein
+
+         mov  ah,40h    ;Funktionsnummer
+         mov  bx,1      ;Handle-Nummer
+         mov  dx,di     ;DS:DX auf String!
+         int  21h       ;ASCII-Zahl ausgeben!
+         popa           ;Register wiederherstellen
+         ret            ;und zur&uuml;ck!
+Ausgabe  ENDP           ;Ende Prozedur
+
+	END
+</pre>
+<BR>
+--> Erstellen der EXE-Datei mit TASM Dateiname und TLINK Dateiname<BR>
+Bsp.: Ihre Datei heisst CRC16.asm, tippen sie also: Tasm CRC16 [Return] und dann tlink CRC16
+[Return].<BR>
+<BR>                                               
+Download: <a href="crc16.zip">Programm inclusive Macro.inc</a><BR>
+<a href="anhang.htm">Weiter geht es hier!</a>
+
+<BR><BR>
+<center>
+<a href="asm9.htm">Zur&uuml;ck</a>   <a href="anhang.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</font></p>
+</body>

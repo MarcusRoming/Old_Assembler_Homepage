@@ -1,0 +1,90 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Informationen zum Buch!</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 17.09.06</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+
+Hier noch etwas zum Inhalt unseres Buches (das weit über diese immer noch veraltete Homepage hinausgeht!) und am Ende noch ein Hinweise auf ein paar kleinere <a href="#errata"><B>Fehler der 1. Auflage</B></a> die sich in unser Buch eingeschlichen haben:
+<BR><BR>
+<h3>Inhaltsverzeichnis der 2. Auflage:</h3>
+<font color=red>Inhaltsverzeichnis der <B>2. Auflage</B> gibt es <a href="inhalt.pdf"><B>hier als PDF!</B></a><BR></font> Das Buch hat 600 Seiten und wird mit einer CD-Ausgeliefert. Neuigkeiten: Stark erweitertes Coprozessor Kapitel, neue Befehle, neue Aufgaben, Kapitel über den Befehl CPUID, Optimieren von Code, Reverse Engineering, Infos zu Linux und NASM.
+<BR>
+Fehler in der 2. Auflage:<br>
+Bekanntermaßen ist es nicht möglich ein Buch ohne Fehler zu schreiben. Bis jetzt hab ich nur einen gefunden: Im Inhaltsverzeichnis steht NABFBFSM. Das soll wohl NASM heißen würde ich sagen. Ansonsten bis jetzt keine bekannt!
+<h3>Kurze Inhaltsangabe (1. Auflage):</h3>
+<OL>
+<li>Theoretische Grundlagen: Bits, Bytes, Register, Stack usw.
+<li>Mathematisches: Hexadezimal,Dezimal,Dualsystem. Umwandlungen und Rechenoperationen. Halbaddierer usw.
+<li>Erste Programmierschritte: Assembler und Linker, "Hallo Welt" etc.
+<li>Möglichkeiten des Assemblers
+<li>Befehle und Adressierungsarten
+<li>DOS unter der Lupe: Interrupts, COM & EXE, PSP ...
+<li>Programmieren - Die Grundlagen: Arbeiten mit Texten und Zahlen, externe FAR-Prozeduren, Kommandozeile, Ports, Dateien
+<li>Grtafikprogramme: VGA & Co, Feuer-Demo, Geschwindikeitsoptimierung, Bildbetrachter
+<li>TSR´s und Coprozessor.
+<li>Fehlersuche mit dem Debugger.
+<li>Assembler in Hochsprachen.
+Teil II des Buches (von Joachim): Assembler unter Windows.
+<li>Grundlagen zur Windows-Programmierung: Was ist ein API, eine DLL? Messagebox, 32-Bit, FLAT-Modell uvm.
+<li>Fenster, Dialogboxen und Ressourcen: Fenster, Handels, Nachrichten, Menüs, Steuerelemente, Standard-Dialoge...
+<li>Tools: Prostart, Libraries...
+<li>Debugging und Exception-Handling.
+<li>Prozesse-Threads und Timer
+<li>Dateien
+<li>DLL´s
+<li>Registry
+<li>"Behind the scenes"
+<li>MMX und 3DNow!
+<li>Umfangreicher Anhang: Interruptfunktionen, Win32Api-Fktnen,Strukturen,Nachrichten und Lösungen der Übungsaufgaben.......
+</OL><br>
+<b>Inclusive CD-ROM! Insgesamt 474 Seiten!</b><BR><BR>
+
+<A NAME="errata"><h3>Errata 1. Auflage:</h3></A>
+<OL>
+<li><I><B>Feuer-Demo:</B></I> Hier ist ein Fehler im Macro "WaitRet": Darin sind die beiden bedingten Sprünge falsch: Richtig ist je und nicht jne, dann braucht das Programm unter schnelleren Rechnern auch nicht mehr gebremst zu werden (damals hatte ich nur recht langsame Rechner so daß das Problem nie wirklich deutlich rauskam). Nach ändern der Sprünge kann man also das Macro Delay und dessen Aufruf im Programm entfernen! Zudem ist es bei dem Programm nötig die Prozedur "Random" mit "Random ENDP" statt nur mit "ENDP" zu beenden, sonst streikt der MASM (nicht der TASM)! Hier das Programm, mit einem Zusatzfeature beim Beenden, und den Korrekturen zum <a href="slow.zip">Download</a> 
+<li>WinXP: Weder das Assembler-Programm Maus.com noch das Pascal Programm Mausdemo.exe funktionieren unter WinXP! Auch bei anderen Programmen sind Einschränkungen möglich. Zudem ist es günstig, wenn man bei Programmen welche eine Ausgabe (Text,Zahl usw.) tätigen und sich dann selbst beenden, den Benutzer eine Taste drücken läßt. Sonst kann es beim Ausführen von Windows aus passieren, daß der Benutzer das Ergebnis nur extrem kurz zu sehen bekommt, da nach Programmende in der Regel auch das DOS-Fenster geschlossen wird. Dafür eignet sich Funktion 7 des int 21h kurz vor Programmende (also: mov ah,07h + int 21h vor mov ah,4Ch + int 21h bzw. vor ret oder int 20h).
+<li>Zur Frage "Welcher Assembler/Linker?" siehe <a href="masm.htm">hier!</a>
+<li>Das 10,13 bzw. 13,10 am Ende eines Strings ( also z.B. Hallo1   DB "Hallo!",10,13,"$" ) bringt den Cursor an den Anfang der nächsten Zeile (ansonten wird der nächste String direkt hinter dem vorherigen ausgegeben). Während unter DOS die Reihenfolge (also 10,13 oder 13,10) egal ist, so gilt unter Windows nur 13,10. Die Zahlen stehen für die Zeichen CR (carriage Return bzw. Wagenrücklauf, 13) und LF (line feed bzw. Zeilenvorschub, 10)  
+<li>S. 94:  Hier muß es heißen: "So speichert mov word ptr [bx],22h ab der Adresse <B>DS:BX</B> die Bytes [...] wohingegen mov byte ptr [bx],23h an der Stelle <B>DS:BX</B> [...]" also zweimal DS:BX statt DS:DX ganz am Anfang steht es noch richtig da.
+<li>S. 146: Soll natürlich 10 hoch -6 sein
+<li>S. 230: Hier Fehlt in der Zeile "myDialog ...." ein Komma am Ende sowie ein Hinweis, daß alles in eine Zeile muß!
+<li>S. 276: Die Texte von Paramenter 4 und 5 sind vertauscht!
+<li>Folgende Befehle sollten eigentlich im Buch sein, wurden aber vergessen (sorry meine Schuld!). Zum Thema Vorzeichen siehe auch <a href="dso.htm">hier das oberste Programm</a>:
+<br><br><ol>
+<li><B>IDIV: Integerdivision (Vorzeichenbehaftet).</B><br>
+<I>Syntax: IDIV Operand.</I><br>
+Der Befehl IDIV dividiert bei einem Byte-Operanden das AX-Register, bei einem Word-Operanden das Registerpaar DX:AX und bei einem Doubleword-Operanden (32-Bit) das Registerpaar EDX:EAX durch den Operanden. Der Operand kann ein Register oder eine Speichervariable sein. Bei einem Byte-Operanden geht das Ergebnis nach AL und der Rest nach AH. Bei einem Word- bzw. Doubleword-Operanden landet das Ergebnis in AX und der Rest in DX bzw. in EAX und EDX.
+<br><br><li><B>IMUL: Integerdivision (Vorzeichenbehaftet).</B><br>
+<I>Syntax: IMUL Operand1 [,Operand2 [,Operand3]].</I><br>
+Der Befehl IMUL kann eine vorzeichenbehaftete Multiplikation mit a.) einem, b.) zwei oder c.) drei Operanden ausführen. Im Falle von a.) wird wie bei MUL vorgegangen. Bei b.) werden beide Operanden miteinander multipliziert und das Ergebnis wird im ersten Operanden abgelegt. Der erste Operand muß dabei ein 16- oder 32-Bit Register sein, der zweite Operand kann ein Register, eine Speichervariable oder eine Konstante sein. Bei c.) wird der zweite Operand mit dem dritten multipliziert und das Ergebnis im ersten Operanden abgelegt. Der erste Operand muß dabei ein 16- oder 32-Bit Register sein, der zweite Operand kann ein Register oder eine Speichervariable sein, der dritte Operand muß eine Konstante sein.
+<br><br><li><B>BSWAP: Byte Swap, little/big-Endian nach big/little-Endian.</B><br>
+<I>Syntax: BSWAP Operand </I><br>
+Der Befehl BSWAP konvertiert von little-Endian nach big-Endian und vice versa. Der Operand ist ein 32-Bit Register.
+<br><br><li><B>Bedingte Sprünge:</B><br>
+<B>JB</B>: Springe wenn kleiner (below), geprüftes Flag: CF=1. <B>JNB</B>: Springe wenn nicht kleiner (not below), geprüftes Flag: CF=0. <B>JBE</B>: Springe wenn kleiner gleich (below equal), geprüfte Flags: CF=1 oder ZF=1. <b>JNBE</b>: Springe wenn nicht kleiner gleich (not belwo equal), geprüfte Flags: CF=0 und ZF=0.
+<br><br><li><B>WAIT / FWAIT:</B><BR>
+<I>Syntax: WAIT oder FWAIT </I><br>
+Wartet bis Coprozessor fertig ist.
+</OL>
+<br><br>Wird fortgesetzt...
+</OL>
+<br>
+<a href="index.html">Zurück!</a>
+</BODY>
+</HTML>

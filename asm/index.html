@@ -1,0 +1,95 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 26.12.07</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+<img src="gfx/buch.jpg" align=right>
+<h3>Neuigkeiten:</h3>
+<li><b>Neu: Aktuelle (26.12.07) Homepage jetzt als PDF-Datei! Auch für Firefoxnutzer die Probleme haben die kleine Code-Schrift zu lesen ==> <a href="ASMPage.pdf">PDF Hier (242 KB)</a><br><br>
+<li><b>Neu: Buch nun in der 2. Auflage erhältlich! Siehe weiter unten...</b></a><br><br>
+<li><b>Neu: Neues Homepage-Design. Dank an Camal Cakar, der u.a. das Banner gestaltet hat!</b><br><br>
+<li><b>Neu: Mirror unter <a href="http://www.kaskade.gmxhome.de/asm/">http://www.kaskade.gmxhome.de/asm/</a> Schneller und ohne Werbebanner auf der eigentlichen Seite!</b><BR><BR>
+<li><b>Neu: Zwei neue Programme (vom 07.01.05): 32Bit-Zahlenausgabe (mit Vorzeichen) + Win32-Programm "DSOLink" <a href="dso.htm">hier!</a>.</b><br><br>
+Infos wie man an einen kostenlosen Microsoft-Assembler rankommt: <a href="masm.htm">Hier!</a> </b><br><br>
+<BR><B>Ganz neu:</B> Das Buch Assembler Grundlagen der Programmierung. Mehr als 100 Seiten sind dazugekommen! <a href="buch.htm"><B><font color=red>Hier mehr Informationen dazu!</font></B></a> Erhältlich ist es überall im Buchhandel, sowie bei Amazon.de, Buecher.de usw. 600 Seiten, mit Programmierung unter DOS (von mir: <a href="mailto:Marcus.Roming@gmx.net">Marcus Roming</a> ) und Windows (von Joachim Rohde). Infos zur ersten Auflage (Tipps und Errata) <a href="buch.htm">gibt es hier!</a><br> 
+Erschienen im MITP Verlag für 29.95 Eur. ISBN:3-8266-1469-0<br><br>
+<center>______________________</center>
+<BR>
+<h3>Einführung:</h3>
+Vorweggenommen: Assembler ist entgegen seinem Ruf nicht superkompliziert. Man kann damit sehr
+systemnah programmieren und ist nicht eingeschr&auml;nkt. Der vom Assembler erzeugte Code ist im 
+Vergleich zu dem von Hochsprachen a) schneller und b) deutlich kleiner.
+Ich werde versuchen den Text m&ouml;glichst &uuml;bersichtlich und gegliedert zu halten.
+Beginnen werde ich mit einer kurzen Einführung zur Funktionsweise des 8086 Prozessors.
+Keine Angst: der 8086 Prozessor ist zwar veraltet aber alle neuen Prozessortypen bauen
+darauf auf, d.h. Code der f&uuml;r einen 8086´er geschrieben wurde, l&auml;uft selbstverst&auml;ndlich
+auch auf einem 286´er, 386´er, 486´er, Pentium und was da so noch kommt und kommen mag. Der 
+Unterschied zwischen einem 8086´er und einem Pentium besteht im wesentlichen darin, dass der 
+Pentium Prozessor schneller ist und &uuml;ber mehr Befehle verf&uuml;gt.<BR>
+Nach der Einf&uuml;hrung zur Funktionsweise des 8086 kommt eine kurze Zusammenfassung des
+Bin&auml;r bzw. Hexadezimalsystemes. Danch das erste kleine Programm, die wichtigsten Befehle
+und so weiter.<BR><BR>
+
+Bevor das Ganze also losgeht werde ich erstmal sagen, was man alles an Programmen und Infos
+ben&ouml;tigt um loslegen zu k&ouml;nnen.<BR><BR>
+
+Das w&auml;re im einzelnen:<BR><BR>
+<ol>
+<li>Nat&uuml;rlich ein Assembler. Der Assembler ist ein Programm, welches ihre symbolischen Befehle
+in eine Zahl bzw Zahlenfolge d.h. in Maschinenbefehle &uuml;bersetzt. 
+Der Beste d&uuml;rfte der Turbo Assembler von Borland sein (TASM) es gibt ihn in der Version 4.0 
+f&uuml;r ca. 50 DM auf einer CD vom Franzis Verlag ISBN: 3-7723-9442-b. Auf der CD sind noch viele 
+Infos und viel Sourcecode... feine Sache.
+Auch der Microsoft Assemler (MASM) ist nicht schlecht, die Bedienung fast gleich. Gibt es <a href="masm.htm">hier!</a>
+<BR><BR>
+<li>F&uuml;r sp&auml;tere, eigene Projekte: Ralf Brown´s legend&auml;re Interruptliste. Bekommt man zusammen 
+mit einer Portliste von Wim Osterhold, einer Liste zur DOS Speicherbelegung von Robin Walker 
+und einer Interruptzusammenfassung von Bent Lynggaard: Zwei ZIP´s (techn. Gründe)<br> <a href="rb01.zip">Teil I (441 KByte)</a> & <a href="rb02.zip">Teil II (417 Kbyte)<a>
+F&uuml;r eine aktuellere Version wende man sich an die im jew. File angegebenen 
+Adressen bzw. an die in der Datei Rbrown.txt unter "Availability:" genannten Adressen.
+<BR><BR>
+<li>Die DOS Technical Reference von Dave Williams ist auch nicht schlecht und beinhaltet zum 
+Teil Info´s die die anderen Texte nicht haben. Auch sind ziemlich alle Funktionen von Int 21h 
+(dem wichtigsten) beschrieben. <a href="dos-re.zip">Download</a> (156 KB) --> Für den Anfang besser !
+<BR><BR>
+<li>Ein einfacher wissenschaftlicher Taschenrechner, zur Umrechnung von [Hex]adezimal oder 
+[Bin]&auml;r nach Dezimal usw. Hat wahrscheinlich jeder, wenn nicht gibt es gute um 30 DM oder 
+halt im Kopf umrechnen. 
+<BR><BR>
+<li>Last but not least: Meine HTML Files zum <a href="asm.zip">Download</a> (228 KB Zip) Enth&auml;lt alles ausser der 
+DOS-Technical-Ref., Hed und Ralph Browns Int. Liste. Aktualisiert: 20.03.04 !
+</ol>
+<BR><BR><BLOCKQUOTE>
+     Die Homepage als <a href="ASMPage.pdf">PDF-Datei!</a> Vom 22.03.05. 240 KB (Dank an HTMLDOC!)</BLOCKQUOTE>
+<BR>
+<b><i><u>Achtung:</u></i></b> Die Listen von 2. und 3. sind f&uuml;r sp&auml;ter gedacht, wenn Sie eigene Programme
+schreiben wollen. F&uuml;r den Anfang bekommen Sie nat&uuml;rlich alle Info´s die Sie brauchen
+von mir !
+<BR><BR>
+Weiter geht es nun mit einer Einf&uuml;hrung in den <a href="8086.htm">8086 Prozessor</a>.
+<BR><BR>
+Sie k&ouml;nnen sich auch das <a href="inhalt.htm">Inhaltsverzeichnis</a> ansehen !<BR><BR>
+                           
+  
+                                               <CENTER>*</CENTER>
+</font></p>
+</body>
+
+</body>
+</html>

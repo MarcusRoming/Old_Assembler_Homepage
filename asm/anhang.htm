@@ -1,0 +1,100 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+Hier m&ouml;chte ich noch ein paar wichtige Dinge ansprechen:<BR><BR>
+
+<u><i>1. Die "alten" Segmentanweisungen:</i></u><BR>
+Die Segmente wird wie folgt Deklariert:
+<pre>
+DATEN SEGMENT               ;Der Name (hier Daten) kann bel. gewaehlt werden
+;Hier kommen die Daten rein
+DATEN ENDS ; END Segment
+
+STAPEL SEGMENT
+dw 128 DUP (?)  ;Def. der Stackgroesse
+STAPEL ENDS
+
+CODE SEGMENT
+ASSUME CS:CODE, DS:DATEN, ES:NOTHING, SS:STAPEL ;&lt;-- hier erfolgt die genaue Zuweisung zu den
+                                                ;    Segmentregistern
+START:
+;Hier kommt der Code rein
+
+CODE ENDS
+END START
+</pre>
+<u><i>2. Fehlersuche mit dem Debugger:</i></u><BR>
+Um Fehler in einem Programm zu finden benutzt man am besten einen Debugger (z.B Borland Turbo
+Debugger DOS). Dort kann man das Programm schrittweise abarbeiten (z.B. mit F7), die Register 
+und Segmente einsehen und nat&uuml;rlich auch den disassemblierten Code. Auch kann man Breakpoints
+setzten und so mit Run z.B. langwierige Schleifen abarbeiten. Den Turbo-Debugger starten Sie so: 
+td Filename.ext . EXT = EXE oder COM.<BR>
+<BR>
+<u><i>4. Literatur:</i></u><BR>
+Da es meiner Erfahrung nach schwierig ist Literatur zu finden (entweder vergriffen oder sauteuer)
+hier ein paar Tips (Diese B&uuml;cher waren auch meine Quellen):<BR><OL>
+<li>Zuallererst nat. meines ;-) : Roming, Rhode. MITP. ISBN: 3-8266-0671-X Preis: 24,95 Eur 472 S.<BR>
+<li>Programmiersprache Assembler. Reiner Backer. ro ro ro. ISBN: 3-499-19249-7 Preis: 18.90 DM<BR>
+<li>Assembler Programmierung. G&uuml;nter Born. Addison Wesley. ISBN: 3-89319-882-2 Preis: 39.90 DM<BR>
+Es handelt sich hier um eine CD-ROM, mit dem Buch im PDF-Format, Reader dabei.<BR>
+<li>Assembler griffbereit. Joachim Erdweg. Vieweg. ISBN:3-528-05231-7 -->Nachschlagewerk <BR>
+Es enthält die Prozessorbefehle bis 486´er und viele Int 21h Funktionen. Preis: 18 DM<BR>
+<li>Internet. So gibt es z.B. massig Vi.. Sourcecode. Sehr lehrreich !! Aber bitte auf die<BR>
+Kreationen aufpassen, ich m&ouml;chte sie nicht auf meiner Platte haben.  <BR>
+<li>Am besten zum Lernen von Assembler ist Sourcecode !  <BR>
+<li>Assembler Programmierung von Wolfgang Link 8. Auflage. ISBN: 3-7723-8838-8.<BR>
+Das Buch hat ca. 300 Seiten und beinhalted eine CD. Preis: 79 DM<BR>
+<li>TASM. Sven Letzel, René Meyer. Internat. Thomson Publ. ISBN: 3-929821-83-4. Preis: 79 DM<BR>
+Sehr gelungenes und umfangreiches Buch, anscheinend nicht mehr erhältlich wohl aber: MASM. <BR>
+<BR></OL>
+<u><i>5. N&uuml;tzliches:</i></u><BR><OL>
+<li>Die .RADIX-Directive.<BR>
+Normalerweise Interpretiert der Assembler alle Zahlen ohne Anh&auml;ngsel als Dezimalzahl.<BR>
+Wer aber nicht dauernd h schreiben will kann dies durch .RADIX 16 &auml;ndern, alle Zahlen<BR>
+ohne Anh&auml;ngsel werden dann Hexadezimal Interpretiert. Dezimalzahlen m&uuml;ssen dann mit<BR>
+einem d versehen werden ! .Radix 2 : alle Zahlen werden als Bin&auml;rzahlen interpretiert.<BR>
+<li>Ein Hexeditor ist auch manchmal gut: <a href="hed.zip">Hed</a> f&uuml;r Windows (204 KB), einer der Besten, mit<BR>
+Disassemblier-Funktion, f&uuml;r Men&uuml; einfach ESC dr&uuml;cken!<BR>
+<li>Ein <a href="glossary.lst">Glossar</a> in Englisch, sehr gut!<BR>
+<li>EditPlus. Toller Texteditor! Gibt es <a href="http://www.editplus.com">hier</a>. Und eine stx Datei speziell f&uuml;r asm-Dateien<BR>
+&nbsp;&nbsp;&nbsp;kann man hier <a href="asm.stx">downloaden</a>.  <BR>
+<BR></OL>
+<BR>
+<u><b>Rechtliches:</b></u><BR>
+Diese Homepage ist <b>FREEWARE</b> d.h. sie darf unentgeltlich aber <b>NUR</b> <b>KOMPLETT</b> und <b>UNVER&Auml;NDERT</b> <BR>
+weitergegeben werden !<BR>
+Ich &uuml;bernehme <b>keinerlei Haftung</b> f&uuml;r durch diese Homepage enstandene eventuelle Sch&auml;den !<BR>
+TASM, Turbo Assembler und Borland sind eingetragene Warenzeichen der Borland Corporation<BR>
+Microsoft, Windows 95  und MASM sind eingetragene Warenzeichen der Microsoft Corporation<BR>
+Bei <b>Leseproblemen</b> versuchen Sie Bitte: <b>min. 800x600 + Vollbild</b><BR>
+<BR>
+Der Autor, am 31.08.00<BR>  
+<BR>
+Bei Kritik und Anregungen: <a href="mailto:Marcus.Roming@gmx.net">Schreiben Sie mir !</a> <BR>
+<b>Neu:</b> <a href="public.asc">PGP Key !</a><BR>
+<BR>
+Zuguterletzt: Noch ein paar <a href="links.htm">Links</a> !<BR>
+<center>
+
+<a href="asmx.htm">Zur&uuml;ck</a>   <a href="links.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</font></p>
+</body>

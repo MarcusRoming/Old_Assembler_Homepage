@@ -1,0 +1,285 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+Ich werde zwei Programme vorstellen, mit denen man den Inhalt des CMOS-RAM sichern und danach 
+bei Bedarf wieder herstellen kann.<BR>
+Diese Programme zeigen, wie man Daten zu einem Port schickt bzw von diesem erh&auml;lt. Das Programm
+zu wiederherstellen habe ich  getestet, (auf einem P90 mit AMIBIOS) und es hat funktioniert, 
+aber ist es trotzdem m&ouml;glich, dass es unter bestimmten Umst&auml;nden Schaden anrichten kann. 
+In diesem Fall: Ich habe Sie gewarnt. Das Sicherungsprogramm funktioniert. Mehr Informationen 
+zum CMOS-RAM finden sie in dieser <a href="cmos.lst">Textdatei</a>.<BR><BR>
+<i><u>Vorbemerkungen zur Datei-Verwaltung mit Handles:</i></u><BR>
+Bevor man etwas in eine Datei schreiben kann, oder etwas aus ihr lesen muss man sie &ouml;ffnen.
+Dies geschieht mit der DOS-Funktion 3Dh. AH muss also mit 3Dh belegt werden, in AL kommt der 
+Zugriffsmodus: 0 f&uuml;r nur Lesen, 1 f&uuml;r nur Schreiben und 2 f&uuml;r Lesen und schreiben.
+Der Name der Datei wird &uuml;ber DS:DX angegeben. Wenn das &Ouml;ffnen klappt, bekommt man in AX ein
+sogenanntes Handle. &Ouml;ffnet man eine weitere Datei, dann erh&auml;lt man ein anderes Handle.
+Beim Zugriff auf eine Datei muss immer das Handle angegeben werden, es dient also zur 
+Identifikation der Datei(en).  Folgende Handles sind vorbesetzt, man kann mit ihnen und mit der
+Hilfe der DOS-Funktionen auch auf Ausgabeger&auml;te schreiben/lesen, diese also wie eine Datei
+behandeln:<BR>
+<pre>
+<i><u>Handle:    Ger&auml;t:                      Bezeichnung:                          </i></u>
+  1        Bildschirm                  Standart-Ausgabe       (STDOUT,CON)
+  2        Bildschirm                  Standart-Fehlerausgabe (STDERR)  
+  3        Serielle  Schnitstelle      Hilfsein-/ausgabe      (STDAUX,AUX,COM)
+  4        Drucker/Parallele Schnitst. Standart-Drucker       (STDPRN,PRN,LPT)
+</pre>
+Wenn man die Datei erst erstellen muss, dann benutzt man DOS-Funktion 3Ch. Man erh&auml;lt dann
+ebenfalls eine Handle in AX.  Der Dateiname muss &uuml;ber DS:DX angegeben werden. Für beide F&auml;lle
+(&ouml;ffnen/erstellen) gilt: Der Dateiname muss so:  Lbl DB "Dateiname.ext",0 beendet werden also 
+durch das ASCII Zeichen 00h. Mit der Funktion 3Fh kann man dann aus der Datei (bzw. dem Ger&auml;t) 
+lesen, mit Funktion 40h kann man schreiben. Das Handle muss diesen Funktionen immer in BX 
+&uuml;bergeben werden, die Anzahl der zu lesenden/schreibenden Bytes muss in CX &uuml;bergeben werden. 
+Die gelesenden/zu schreibenden Daten kommen/stehen in den/im Puffer, der &uuml;ber DS:DX 
+adressiert wird. Wenn man Fertig ist, muss die Datei mit Funktion 3Eh geschlossen werden, das 
+Handle muss wieder in BX stehen. Bei allen Handle-Funktionen gilt: Wird nach der Funktion das 
+Carry-Flag gesetzt, dann ist ein Fehler aufgetreten. Dies kann mit JC &uuml;berpr&uuml;ft werden.<BR>
+<pre>
+<u><i>Zusammenfassung:</i></u>
+
+<b>1. &Ouml;ffnen einer Datei:</b>
+Interrupt 21h Funktion 3Dh.
+Eingabe:
+AH = 3Dh
+AL = Zugriffsmodus (00h = Nur lesen, 01h = Nur schreiben, 02h = Lesen und schreiben)
+DS = Segmentadresse des Dateinamens
+DX = Offsetadresse des Dateinamens
+Ausgabe:
+Carry Flag = 0 --> Ok
+AX = Handle der Datei
+Ist ein Fehler aufgetreten dann Carry Flag = 1 und Fehlercode in AX:
+AX = 1 = Datei schon ge&ouml;ffnet
+AX = 2 = Datei nicht gefunden
+AX = 3 = Pfad nicht gefunden
+AX = 4 = Kein freies Handle
+AX = 5 = Zugriff verweigert
+
+<b>2. Datei erstellen:</b>
+Interrupt 21 Funktion 3Ch
+Eingabe:
+AH = 3Ch
+DS = Segmentadresse des Dateinamens
+DX = Offsetadresse des Dateinamens
+CX = Dateiattribut (00h = Normal, 01h = Schreibschutz, 02h = Versteckt, 04h = System)
+Ausgabe:
+Carry Flag = 0 --> OK
+AX = Handle der Datei  -->D.h. die Datei braucht nicht noch extra ge&ouml;ffnet werden!
+Ist ein Fehler aufgetreten dann Carry Flag = 1 und Fehlercode in AX:
+AX = 1 = Pfad nicht gefunden
+AX = 4 = Kein freies Handle
+AX = 5 = Zugriff verweigert
+--> Falls die angegebene Datei bereits existiert, wird sie ohne Warnung &uuml;berschrieben.
+
+<b>3. Datei schliessen:</b>
+Interrupt 21 Funktion 3Eh
+Eingabe:
+AH = 3Eh
+BX = Handle der Datei
+Ausgabe:
+Carry Flag = 0 --> OK
+Carry Flag = 1 --> Fehler u. Fehlercode in AX (AX = 6 = Ung&uuml;ltiges Handle)
+
+<b>4. Datei lesen:</b>
+Interrupt 21h Funktion 3Fh
+Eingabe:
+AH = 3Fh
+BX = Handle der Datei/des Ger&auml;ts
+CX = Anzahl der zu lesenden Bytes
+DS = Segmentadresse des Puffers
+DX = Offsetadresse des Puffers
+Ausgabe:
+Carry Flag = 0 --> OK und AX = Anzahl der gelesenen Bytes
+Carry Flag = 1 --> Fehler u. Fehlercode in AX:
+AX = 5 = Zugriff verweigert
+AX = 6 = Ung&uuml;ltiges Handle
+--> Der "Zeiger" innerhalb der zu lesenden Datei wird automatisch um den Wert in CX erh&ouml;ht, so
+    dass der n&auml;chste Lesevorgang wieder neue Daten einliest.
+
+<b>5. Datei schreiben:</b>
+Interrupt 21h Funktion 40h
+Eingabe:
+AH = 40h
+BX = Handle der Datei/des Ger&auml;ts
+CX = Anzahl der zu schreibenden Bytes
+DS = Segmentadresse des Puffers
+DX = Offsetadresse des Puffers
+Ausgabe:
+Carry Flag = 0 --> Ok und AX = Anzahl der geschriebenen Bytes
+Carry Flag = 1 --> Fehler u. Fehlercode in AX: 
+AX = 5 = Zugriff verweigert
+AX = 6 = Ung&uuml;ltiges Handle
+--> Auch bei dieser Funktion wird der Zeiger innerhalb der Datei automatisch um den Wert in CX
+    erh&ouml;ht, so dass der n&auml;chste Schreibvorgang hinter dem zuletzt geschriebenen Byte erfolgt. 
+
+<i><u>Und hier das Programm zum sichern der CMOS-RAM Daten:</u></i>
+
+
+                     .MODEL SMALL
+                     .STACK 100h
+                     .DATA
+Dateinamen           DB   "CMOS.DAT",0  ;In diese Datei kommen die Daten. Die 0 zeigt das Ende an
+Puffer               DB   ?
+FehlerMeld           DB   "Fehler beim erstellen/schreiben/schliessen der Datei CMOS.DAT !$"
+Msg1                 DB   "CMOS RAM Sicherungsprogramm Version 1.03",13,10,"$"
+
+                     .CODE
+                     cli            ;extern maskierbare Interrupts sperren
+                     mov  ax,@data
+                     mov  ds,ax
+                     mov  dx,OFFSET Msg1
+                     mov  ah,09h
+                     int  21h
+                     mov  dx,OFFSET Dateinamen
+                     xor  cx,cx     ;cx=0 -->Dateiattribut Normal.
+                     mov  ah,3Ch    ;DOS Funktion: Create File with Handle
+                     int  21h       ;Datei Erstellen. Ist eine gleichnamige Datei bereits 
+                     ;vorhanden, dann wird diese ueberschrieben.
+                     ;*******************************
+                     jc   Fehler    ;Springe wenn Fehler
+                     xchg bx,ax     ;Handle sichern. Das Handle dient als eine Art Kennung der 
+                                    ;Datei, wenn auf diese zugegriffen wird.
+                     ;*******************************
+                     mov  cx,80h    ;CMOS Maximaladdresse in cx 
+                                    ;Das CMOS-RAM ist bei neueren Computern 128 Bytes gross (80h)
+                     xor  ah,ah     ;ah Zeigt auf tatsaechliche CMOS-RAM Addresse
+Schleife:
+                     mov  al,ah     
+                     out  70h,al    ;In diesen Port kommt die Offsetadresse im CMOS-RAM rein
+                     jmp  $+2       ;Der Befehl soll nur Zeit verbrauchen. 
+                                    ;Das $ wird hier vom Assembler als die aktuelle Position
+                                    ;im Code interpretiert. Gesprungen wird also direkt zum 
+                                    ;naechsten Befehl (in al,71h)
+                     in   al,71h    ;CMOS Daten aus Port einlesen aus oben eingegebener Adresse.
+                     mov  Puffer,al ;In den Puffer!
+                     ;*******************************
+                     push cx        ;Schleifenzaehler cx auf Stack
+                     push ax        ;Addresszaehler ax bzw ah auf Stack
+                     mov  ah,40h    ;DOS-Funktion: Write file or Device
+                     mov  cx,01h    ;Laenge der zu Speichernden Daten
+                     mov  dx,OFFSET Puffer ;Puffer von dem Geschrieben wird
+                     int  21h       ;Puffer in Datei Schreiben
+                     jc   Fehler
+                     pop  ax        ;ax vom Stack
+                     pop  cx        ;cx vom Stack
+                     inc  ah        ;ah Erhoehen!
+                     Loop Schleife
+                     ;*******************************
+                     mov  ah,3Eh    ;Datei schliessen
+                     int  21h
+                     jnc  Ende
+Fehler:              mov  dx,OFFSET FehlerMeld
+                     mov  ah,09h
+                     int  21h       ;Fehlerbehandlung fuer Arme
+                     ;*******************************
+Ende:                sti            ;Extern maskierbare Interrupts zulassen
+                     mov  ah,4Ch
+                     int  21h       ;Und Tschuess
+                     END
+
+;-->Dieses Programm speichert also die CMOS-RAM Daten in der Datei Cmos-dat, welche ins selbe
+;   Verzeichnis kommt.
+
+<i><u>Und hier das Programm zum wiederherstellen der CMOS-RAM Daten:</u></i>
+
+                     .MODEL SMALL
+                     .STACK 100h
+                     .DATA
+Dateiname            DB   "CMOS.DAT",0
+Puffer               DB   ?
+FehlerMeld           DB   10,13,"Fehler beim oeffnen/lesen/schliessen der Datei!" 
+                     DB   "Datei CMOS.DAT vorhanden?$"   ;<-- Fortsetzung von oben
+Copyright            DB   "CMOS RAM Wiederherstellung Version 1.01$"
+Frage                DB   10,13,"CMOS RAM Wiederherstellen (y/n) ? $"
+                     .CODE
+                     cli
+                     mov  ax,@DATA
+                     mov  ds,ax
+                     mov  dx,OFFSET Copyright
+                     mov  ah,09h
+                     int  21h
+                     mov  dx,OFFSET Frage
+                     int  21h
+                     mov  ah,08h    ;DOS-Funktion:Zeichen von der Tastatur lesen. Ausgabe in AL
+                     int  21h
+                     cmp  al,'y'
+                     je   Weiter
+                     call Beenden      ;Prozedur zum beenden des Programms aufrufen
+Weiter:              mov  dx,OFFSET Dateiname
+                     xor  al,al
+                     mov  ah,3Dh    ;DOS-Funktion: Datei oeffnen
+                     int  21h
+                     jc   Fehler
+                     mov  bx,ax     ;Handle sichern
+                     mov  cx,80h    ;Max. Adresse
+                     xor  ax,ax     ;Ax=0
+Schleife:
+                     push cx
+                     push ax
+                     mov  ah,3Fh    ;DOS-Funktion: Datei lesen.
+                     mov  dx,OFFSET Puffer
+                     mov  cx,01h
+                     int  21h
+                     jc   Fehler
+                     ;***********************
+                     pop  ax
+                     pop  cx
+                     mov  al,ah
+                     out  70h,al    ;Adresse im CMOS-RAM hier rein
+                     jmp  $+2       ;Delay-Befehl
+                     mov  al,Puffer
+                     out  71h,al    ;Inhalt des Puffers hier rein
+                     inc  ah
+                     Loop Schleife
+                     ;***********************
+                     mov  ah,3Eh    ;Datei schliessen
+                     int  21h
+                     jnc  Ende
+Fehler:              mov  dx,OFFSET FehlerMeld
+                     mov  ah,09h
+                     int  21h
+Ende:                sti
+                                    ;Die Beenden Prozedur muss nicht extra aufgerufen werden
+Beenden              PROC   NEAR    ;denn hier kommt sie ja sowieso
+                     mov  ah,4Ch   
+                     int  21h
+Beenden              ENDP
+ 
+                     END
+
+;--> Zur Wiederherstellung muss sich die Datei Cmos.dat im selben Verzeichnis befinden (vorher
+;mit dem Sicherungsprogramm erstellt)
+</pre>
+<i><u>Schlussbemerkung:</i></u><BR>
+Diese beiden Programme sind sicher nicht der Weisheit letzter Schluss, so k&ouml;nnte man z.B. beide
+Programme vereinen, die Feherlbehandlung verbessern etc. Ich hab sie trotzdem gebracht, weil 
+sie halbwegs kurz sind, wenn Sie ein besseres Programm wollen... nur zu!<BR>
+Ist mir gerade eingefallen: Besser ist es wohl wenn man die Daten zuerst in eine 128 Byte 
+Variable speichert und die CMOS-Daten erst am Schluss in die Datei bzw. ins CMOS-RAM schreibt 
+das w&auml;re schneller und auch einfacher, byteweise geht es allerdings auch. Für Moderne PC´s ist der Gebrauch nicht mehr sinnvoll da mehr als 128 Bytes im RAM gespeichert sind!<BR>
+<BR>
+Weiter geht es mit einem weiteren <a href="asm8.htm">Programm</a>.<BR>
+<BR>
+<center>
+<a href="asm6.htm">Zur&uuml;ck</a>   <a href="asm8.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</font></p>
+</body>

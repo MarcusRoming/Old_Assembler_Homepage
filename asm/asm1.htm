@@ -1,0 +1,81 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+<blockquote>
+Ich habe bei dem Programm die vereinfachten Segmentanweisungen benutzt, welche nur von neueren
+Assemblern unterst&uuml;tzt werden. Ich weiss nicht wie verbreitet &auml;ltere Assembler sind,
+m&ouml;glicherweise werden diese Anweisungen von ihrem Assembler nicht unterst&uuml;tzt. Ich werde daher
+die normalen Segmentanweisungen im Anhang kurz erkl&auml;ren. Programmiert habe ich im MASM
+Modus, da ich vom Ideal Modus nicht viel halte. Der MASM Modus hat auch den Vorteil, dass er
+sowohl vom MASM als auch von TASM verstanden wird.<BR>
+Das Assemblerprogramm beginnt mit <b>.MODEL SMALL</b> .Dieser Befehl richtet sich an den Assembler
+selbst, und wird nicht direkt &uuml;bersetzt. Der Befehl legt fest, dass Daten und Code jeweils
+ein eigenes Segment erhalten, dass nicht gr&ouml;sser als 64 KB sein darf. .MODEL TINY w&uuml;rde
+bedeuten, dass Daten und Code in ein einziges Segment passen m&uuml;ssen, das ebenfalls nicht 
+gr&ouml;sser als 64 KB sein darf. Dies w&uuml;rde dann, zusammen mit ein paar anderen Modifikationen
+eine COM Datei (engl. compile = zusammenstellen) erzeugen.<BR>
+Die n&auml;chste Anweisung ist <b>.STACK 100h</b>. Dies legt die gr&ouml;sse des Stack auf 256 Byte fest, 
+wenn man versucht mehr darauf zu speichern gibt es einen Stack overflow oder Stapel&uuml;berlauf.
+Versucht man etwas vom Stack zu holen, wenn dieser leer ist gibt es einen Stack underflow.
+F&uuml;r unser Programm ist ein Stack mit 256 Byte mehr als gross genug. Wird kein Wert angegeben
+werden 1024 Byte reserviert. <BR>
+<b>.DATA</b> definiert das Datensegment. Hier kommen Daten und Variablen, Puffer usw. rein. Die Daten
+werden durch ein Label gekennzeichnet, welches vom Assembler in eine Adresse umgesetzt wird.
+In unserem Fall heisst das Label "Meldung". Der Namen kann beliebig gew&auml;hlt werden, jedoch
+werden nur die ersten 31 Zeichen ber&uuml;cksichtigt.  Folgende Zeichen sind in Labels erlaubt:
+1. A-Z  2. a-z  3. 0-9 (nicht am Anfang des Namens)  4. _ und @ und ? und $ (d&uuml;rfen nicht 
+allein stehen). Zwischen Gross und Kleinbuchstaben wird nicht unterschieden.<BR>
+<b>DB</b> steht f&uuml;r define Byte. Der Assembler z&auml;hlt automatisch die Zeichen in den doppelten
+Hochkommata (es gehen auch einfache) und reserviert den Speicherplatz. Wenn sie doppelte 
+Hochkommata benutzen, d&uuml;rfen sie diese nicht in der Zeichenkette benutzen und andersherum.
+D.h. so geht es: DB "Tom´s cat" und so: DB ´Er sagte: "Hallo"´ .<BR>
+<b>.CODE</b> bezeichnet den Anfang des Codesegments. D.h. nun folgen die Befehle.<BR>
+Der Befehl <b>mov</b> kopiert den Inhalt des Quelloperanden in den Zieloperanden. So schiebt z.B.
+mov ax,1500 den Wert 1500 nach AX. Also ist danach AX = 1500. <b>@data</b> enth&auml;lt die Adresse des
+Datensegments (der Assembler ermittelt diese Zahl). mov ax,@data schiebt also die Adresse des
+Datensegments nach ax. mov ds,ax schiebt die den Wert von AX nach DS. Das Datensegmentregister
+enth&auml;lt also nun die Adresse des Datensegments. <BR>
+mov ds,@data sieht zwar k&uuml;rzer aus, geht aber nicht, da man Segmentregister nicht direkt
+mit Konstanten laden kann. Man muss also den Umweg &uuml;ber ein Universalregister in kauf nehmen.
+<b>mov dx,OFFSET</b> Meldung schiebt die Offsetadtresse von Meldung nach dx. OFFSET Meldung wird vom
+Assembler in einen Wert umgesetzt, OFFSET selbst ist kein Maschienenbefehl.<BR>
+<b>mov ah,09h </b>schiebt den Wert 9 nach ah. AX wird sozusagen zur H&auml;lfte &uuml;berschrieben.
+<b>int 21h</b> verzweigt in ein Unterprogramm des Betriebssystemes. Das Programm wird unterbrochen
+(Interrupt!) und DOS f&uuml;hrt nun seine Funktion 09h aus: Write String, schreibe Zeichenkette.
+Die DOS-Funktion muss in ah stehen (in unserem Fall ist es Funktion 9). Ausserdem ben&ouml;tigt
+die DOS-Funktion noch Angaben &uuml;ber den Ort der Zeichenkette. Dieser wird durch die 
+Segmentadresse in DS und die Offsetadresse in DX definiert. Das Ende der Zeichenkette wird
+dem Betriebssystem durch ein <b>$</b> mitgeteilt, welches selbst nicht angezeigt wird.<BR>
+Das Unterprogramm welches durch Int 21h ausgel&ouml;st wurde kehrt am Ende wieder in das Programm
+zur n&auml;chsten Anweisung zurück. Alle n&ouml;tigen Informationen hat der Prozessor im Stack 
+gespeichert. <b>mov ah,4Ch</b> schiebt 4Ch nach AH. Die Kennung der Interruptfunktion befindet sich 
+also nun in ah. Int 21h l&ouml;st ein weiteres Unterprogramm aus, welches das Programm beendet. 
+<b>END</b> zeigt dem Assembler das Ende an, hier wird nicht mehr weiter&uuml;bersetzt. <BR><BR></blockquote>
+
+<BR>
+Nun geht es <a href="asm2.htm">weiter</a> mit genaueren Informationen zum Aufbau eines Assemblerprogramms.
+<BR><BR>
+
+<center>
+<a href="first.htm">Zur&uuml;ck</a>   <a href="asm2.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</font></p>
+</body> 

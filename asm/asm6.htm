@@ -1,0 +1,89 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+Mit diesem kleinen Programm will ich zeigen, wie man den Status der Num-Lock Taste ver&auml;ndern
+kann. Auch m&ouml;chte ich zeigen, wie man eine beliebige Stelle im Speicher manipulieren kann.
+Bei der physikalischen Adresse 0417h befindet sich das Statusbyte des Keyboards. Bit 5 ist f&uuml;r 
+Num-Lock zust&auml;ndig. Ist es gesetzt, ist Num-Lock an und die Signallampe auf der Tastatur
+leuchtet.<BR>
+<pre>
+<i>Programm als COM-Datei:</i>
+
+ 
+                      .MODEL TINY                       ;Speichermodell fuer COM Dateien
+                      .CODE                            
+                      ORG 100h
+                                
+Start:                mov  ax,0040h       
+                      mov  es,ax                        ;Segmentadresse = 40h (Segmentoverwrite)
+                      xor  byte ptr ES:[17h],00100000b  ;Bit 5 "umpolen" 
+                      mov  ah,4Ch
+                      int  21h                          ;Programm beenden.
+                      END  Start            
+
+
+<i>Gleiches Programm etwas anders (Adressierung etw. anders):</i>
+
+
+                      .MODEL TINY                        ;Speichermodell fuer COM Dateien
+                      .CODE                            
+                      ORG 100h
+                                
+Start:                mov  ax,0000h       
+                      mov  es,ax                         ;Segmentadresse = 0h (Segmentoverwrite)  
+                      xor  byte ptr ES:[0417h],00100000b ;Bit 5 "umpolen".
+                      mov  ah,4Ch
+                      int  21h                          ;Programm beenden.
+                      END  Start        
+
+</pre>
+<u><i>Info:</i></u><BR>
+Was bedeutet xor byte ptr ES:[17h] ? Byte ptr sagt dem Assembler, das er ein Byte berarbeiten 
+soll, WORD PTR w&uuml;rde ein Word bearbeiten. Beispiel: Man m&ouml;chte an die Adresse 3000
+den Wert 40h speichern. Mit mov [3000],40h weiss der Assembler noch nicht, ob er ein Word oder
+ein Byte kopieren soll. Mit Byte / Word PTR muss man also die Breite angeben:<BR> 
+mov byte ptr [3000],40h. Die eckige Klammer signalisiert, dass der Inhalt einer Speicherstelle 
+gemeint ist. ES:[17h] zeigt den genauen Speicherort an, welcher aus Segmentadresse und Offset-
+adresse besteht. Man k&ouml;nnte anstatt des Extrasegmentes hier auch das Datensegment zur 
+Adressierung verwenden.<BR>
+<BR>
+<u><i>Info´s zur indirekten/indizierten Adressierung:</i></u><BR>
+Bei der indirekten Registeradressierung wird die Offsetadresse durch ein oder mehrere der 
+folgenden Register gebildet: BX, BP, DI, und SI. Es gibt folgende Kombinationsm&ouml;glichkeiten:
+[bx] ; [bp] ; [di] ; [si] ; [bx+di] ; [bx+si] ; [bp+di] ; [bp+si] .<BR>
+Bei der indizierten Adressierung kommt zu den Registern noch ein konstanter Wert hinzu (z.B. der
+eines Labels). Es gibt dann folgende Kombinationen:<BR>
+[Label+bx] ; [Label+bp] ; [Label+di] ; [Label+si] ; [Label+bx+di] ; [Label+bx+si] ; <BR>
+[Label+bp+di] ; [Label+bp+si] .<BR>
+Diese beiden Adressierungsarten haben den Vorteil, dass der Wert ver&auml;derbar ist und erst
+w&auml;hrend des Programmablaufes festgelegt wird. Man kann damit zum Beispiel auf Tabellen 
+zugreifen und so weiter. Standartm&auml;ssig wird als Segmentregister das Datensegment verwendet
+ist bp beteiligt wird das Stacksegment verwandt. Diese beiden Adressierungsarten sind f&uuml;r den
+Anfang jedoch noch nicht so wichtig.<BR>
+<BR>
+<BR>
+Weiter geht es mit einem weiteren <a href="asm7.htm">Programm</a>.
+<BR><BR>
+<center>
+<a href="asm5.htm">Zur&uuml;ck</a>   <a href="asm7.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</font></p>
+</body>

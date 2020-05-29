@@ -1,0 +1,253 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+Die Idee f&uuml;r diese Programm ist mir gekommen, als ich an diese Homepage gearbeitet hab.
+In HTML sollte man die Umlaute ja bekanntlich besser "Maskieren". Wenn man nun seine Homepage
+mit dem m&auml;chtigen Notepad-Tool erstellt darf man wegen jedem noch so dummen &auml; ein &amp;auml; 
+schreiben, das Gleiche gilt f&uuml;r &uuml;,&ouml; usw. Was liegt nun also n&auml;her, als ein 
+Konvertierungsprogramm zu schreiben, das alle &uuml;´s und &auml;´s usw. durch &amp;uuml;´s und &amp;auml;´s usw. 
+ersetzt. Das Programm wird &uuml;ber sogennante Kommandozeilenparameter gesteuert, d.h. der Pfad 
+und der Dateiname wird nach dem eigentlichen Programmnamen eingegeben:<BR> 
+Konvert [LW:\][Pfad\]Dateiname.ext . Alles was in [] steht ist wieder optional. Das Programm 
+kopiert dann die Datei Byte f&uuml;r Byte [ziemlich langsam, aber f&uuml;r Internetprojekte duchaus
+schnell genug, da diese meist (was den Text angeht)<< 1 MB sind] und ersetzt gegebenenfalls 
+Zeichen durch Textstrings. Die so konvertierte Datei wird mit gleicher Erweiterung aber mit 
+leicht ver&auml;ndertem Dateinamen abgespeichert und muss nun nur noch ggf. umbenannt werden.
+Die Kommandozeile wird dem Programm &uuml;ber das sogenannte PSP (Programm Segment Pr&auml;fix)
+&uuml;bergeben. Das PSP ist 256 Bytes gross (100h) und beinhaltet diverse Informationen, bei COM-
+Dateien befindet es sich immer direkt davor deshalb das ORG 100h ! Beim Programmstart zeigen
+bei einer COM- und EXE-Dateien ES und DS auf den Anfang des PSP´s oder genauer ES:0000 bzw.
+DS:0000. Die Kommandozeile, also der Textstring den der User nach dem eigentlichen Namen der
+EXE- bzw. COM-Datei eingibt befindet sich, inklusive des Leerzeichens zwischen dem Dateinamen
+und der Kommandozeile, im PSP ab der Adresse 81h, d.h. da man das Leerzeichen meist nicht will
+ab der Adresse 82h. Die L&auml;nge der Kommandozeile (auch wieder plus Leerzeichen) befindet sich 
+in dem Byte bei 80h. Zuerst werden die Kommandozeilen-Daten in einer Variablen im Datensegment 
+mit rep movsb abgespeichert. Diese Variable ist mit 0 (Ascii 00h) vorbelegt, so dass am Ende 
+auf jeden Fall eine 0 steht. <BR><BR><BR>
+<u><i>Aufbau des Programms:</i></u><BR><OL>
+<li>Die Kommandozeile wird in der Variable CommandTail gespeichert.<BR>
+<li>Die Eingabe wird rudiment&auml;r auf Fehler &uuml;berpr&uuml;ft:<BR>
+Wenn die Kommandozeile kleiner oder gleich 4 Zeichen ist wird zu NoTail gesprungen, die <BR>
+Fehlermeldung Msg2 ausgegeben und das Programm beendet.<BR>
+<li>Der Textstring mit dem Label Message wird ausgegeben.<BR>
+<li>Die durch die Kommandozeile spezifizierte Datei wird im "nur lesen Modus" ge&ouml;ffnet.<BR>
+Wenn dies nicht klappt, wird zum Label Ende gesprungen, die Fehlermeldung Msg3 ausgegeben<BR>
+und das Programm beendet.<BR>
+<li>Das Handle der vorher ge&ouml;ffneten Datei wird in der Variable Datei1 gespeichert.<BR>
+<li>Es wird eine zweite Datei erstellt (da kommt der konvertierte Text rein). Der Name dieser<BR>
+Datei wird aus dem Namen der ersten Datei erstellt, welcher allerdings vorher wie folgt<BR>
+ver&auml;ndert wird: Das Zeichen an der 5. Stelle von hinten (das ist das Zeichen vor dem<BR>
+Punkt) wird durch eine "0" ersetzt oder falls er da schon eine "0" hat duch ein "X". Dazu <BR>
+nimmt man die Startadresse von CommandTail in bx und die L&auml;nge in di. Von di wird nun <BR>
+6 abgezogen (5 Zeichen zur&uuml;ck + 1 Leerzeichen). Nun kann man das Zeichen &uuml;ber die indirekte<BR> 
+Registeradressierung (hier: [bx+di]) &uuml;berpr&uuml;fen und ver&auml;ndern.<BR>
+<li>Das Handle der neuen Datei wird in der Variable Datei2 gespeichert.<BR>
+<li>Aus der ersten Datei wird ein Byte gelesen.<BR>
+<li>In mehreren aufeinanderfolgenden Schritten wird nun das Byte &uuml;berpr&uuml;ft und ggf. ersetzt.<BR> 
+Wenn es kein Umlaut ist, wird das Orginalbyte geschrieben.<BR>
+-> Schritt 8 und 9  werden so lange wiederholt, bis die Datei vollst&auml;ndig konvertiert wurde.<BR>
+(Siehe Code!)</OL><BR>
+<BR>
+--> Das Programm funktioniert nur bei Texten, die mit einem Windows (Ansi) Editor gemacht <BR>
+&nbsp;&nbsp;&nbsp;&nbsp;wurden. Um es f&uuml;r DOS umzubauen, muss man nur die Ansi-Zahlen durch DOS Zeichen ersetzen !<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;Also z.B.: statt 252 schreibt man ´&uuml;´ !  <BR>
+<pre>
+<u><i>Und hier das Programm als EXE:</i></u>
+
+                     .MODEL SMALL
+                     .STACK 100h
+                     .DATA
+CommandTail          DB   126 DUP (0)
+Puffer1              DB   ?
+Datei1               DW   ?
+Datei2               DW   ?
+KleinUE              DB   "&amp;uuml;"
+GrossUE              DB   "&amp;Uuml;"
+KleinOE              DB   "&amp;ouml;"
+GrossOE              DB   "&amp;Ouml;"
+KleinAE              DB   "&amp;auml;"
+GrossAE              DB   "&amp;Auml;"
+CountIt              DW   ?
+Message              DB   "HTML Textkonverter WIN Ver 1.00 (c) 1998 by Marcus Roming$"
+Msg2                 DB   "Kein oder falscher Parameter. Syntax: Winkonv [LW:\][Path\]FileName."
+                     DB   "Ext $"                 ;<-- Fortsetzung
+Msg3                 DB   10,13,"Fehler beim oeffnen. Syntax: Winkonv [LW:\][Path\]FileName.Ext$"
+                     .CODE
+                     mov  ax,@data                ;Beim Start zeigen es u. ds aufs PSP 
+                     mov  es,ax                   ;ES zeigt nun aufs Datensegment 
+                     mov  cl,byte ptr ds:[0080h]  ;So lang ist der Tail (Tail = Kommandozeile)
+                     xor  ch,ch                   ;Die groesse des Tails ist nun in CX
+                     push cx                      ;Fuer spaeter !!                   
+                     cmp  cx,04h
+                     jnle KeinFehler              ;Jump not less equal
+                     jmp  NoTail
+KeinFehler:          sub  cx,1                    ;1 weniger, weil ich den Abstand nicht will
+                     mov  si,82h                  ;Quelle: DS:SI, DS zeigt (noch) aufs PSP
+                     mov  di,OFFSET CommandTail   ;Ziel: ES:DI ES zeigt aufs Datensegment. 
+                     rep  movsb                   ;Tail ins Datensegment
+                     mov  ax,@data
+                     mov  ds,ax
+                     lea  dx,Message
+                     mov  ah,09h
+                     int  21h
+                     mov  ax,3D00h                ;Datei oeffnen nur lesen
+                     lea  dx,CommandTail
+                     int  21h
+                     jnc  Ziel1
+                     jmp  Ende
+Ziel1:               mov  [Datei1],ax             ;Handle 1 Sichern die [] ist optional
+                     mov  bx,ax
+                  
+                     mov  ah,3Ch                  ;Datei erstellen
+                     lea  dx,CommandTail
+                     pop  di
+                     sub  di,6                    ;6 abziehen
+                     mov  bx,dx
+                     cmp  byte ptr [bx+di],'0'    ;Ist das Zeichen eine 0 ?
+                     je   GehtNicht
+                     mov  byte ptr [bx+di],'0'    ;Name abaendern
+                     jmp  OK
+GehtNicht:           mov  byte ptr [bx+di],'X'    ;Alternativzeichen
+Ok:                  int  21h
+                     jnc  Ziel2
+                     jmp  Fertig
+Ziel2:               mov  [Datei2],ax             ;Handle 2 sichern
+DoLoop:                                           ;Anfang der Schleife
+
+                     mov  bx,[Datei1]             ;Datei 1 lesen
+                     mov  ah,3Fh
+                     mov  cx,01h                  ;1 Byte
+                     lea  dx,Puffer1
+                     int  21h
+                     cmp  ax,00h                  ;Wenn AX=0 dann wurde kein Zeichen 
+                     jne  Ziel3                   ;gelesen --> Ende! (ganz raus aus der Schleife)
+                     jmp  Fertig
+Ziel3:
+                     cmp  byte ptr [Puffer1],252  ;Ansi-Zahl fuer &uuml; 
+                     jne  Weiter1                 ;Wenn nicht gleich auf den naechsten Pruefen
+                     mov  ah,40h                  ;Wenn gleich die Daten aus KleiUE schreiben
+                     mov  cx,06h
+                     lea  dx,KleinUE
+                     mov  bx,[Datei2]             
+                     int  21h
+                     jmp  Raus                    ;Es wurde ein &uuml; gefunden, es kann also kein 
+                                                  ;anderes mehr kommen--> Sprung ans Ende der 
+                                                  ;Schleife (nicht ganz raus !!))
+Weiter1:
+                     cmp  byte ptr [Puffer1],220  ;Ansi-Zahl fuer &Uuml;
+                     jne  Weiter2
+                     mov  ah,40h
+                     mov  cx,06h
+                     lea  dx,GrossUE
+                     mov  bx,[Datei2]
+                     int  21h
+                     jmp  Raus
+Weiter2:
+                     cmp  byte ptr [Puffer1],228
+                     jne  Weiter3
+                     mov  ah,40h
+                     mov  cx,06h
+                     lea  dx,KleinAE
+                     mov  bx,[Datei2]
+                     int  21h
+                     jmp  Raus
+Weiter3:             
+
+                     cmp  byte ptr [Puffer1],196
+                     jne  Weiter4
+                     mov  ah,40h
+                     mov  cx,06h
+                     lea  dx,GrossAE
+                     mov  bx,[Datei2]
+                     int  21h
+                     jmp  Raus
+
+Weiter4:
+                     cmp  byte ptr [Puffer1],246
+                     jne  Weiter5
+                     mov  ah,40h
+                     mov  cx,06h
+                     lea  dx,KleinOE
+                     mov  bx,[Datei2]
+                     int  21h
+                     jmp  Raus
+
+Weiter5:
+                     cmp  byte ptr [Puffer1],214
+                     jne  Weiter6
+                     mov  ah,40h
+                     mov  cx,06h
+                     lea  dx,GrossOE
+                     mov  bx,[Datei2]
+                     int  21h
+                     jmp  Raus
+                     
+Weiter6:                   
+                     mov  bx,[Datei2]
+                     mov  ah,40h
+                     mov  cx,01h
+                     lea  dx,Puffer1
+                     int  21h
+Raus:               
+                     jmp  DoLoop            ;Unbedingter Sprung nach DoLoop
+
+Fertig:
+                     mov  bx,[Datei1]
+                     mov  ah,3Eh
+                     int  21h
+
+                     mov  bx,[Datei2]
+                     mov  ah,3Eh
+                     int  21h
+                     jmp  GanzFertig
+NoTail:
+                     mov  ax,@data           ;Noch schnell nachholen
+                     mov  ds,ax
+                     lea  dx,Msg2
+                     mov  ah,09h
+                     int  21h                ;Fehlermeldung ausgeben
+                     jmp  GanzFertig
+
+Ende:
+                     lea  dx,Msg3         
+                     mov  ah,09h 
+                     int  21h                ;Fehlermedung ausgeben
+GanzFertig:
+                     mov  ah,4Ch
+                     int  21h
+
+                     END
+
+--> Syntax Beispiel: Winkonv new.txt 
+    Beispiel 2     : Winkonv d:\temp\win.htm
+
+<u><i>Download:</i></u>
+Konverter f&uuml;r Windows (ASM): <a href="winkonv.asm">Winkonv ASM</a> 
+Konverter f&uuml;r Windows (EXE): <a href="winkonv.exe">Winkonv EXE</a></pre> 
+
+
+Nun werde ich die bisher verwendeten <a href="asm9.htm">Interruptfunktionen</a> noch einmal auflisten.<BR><BR><BR>
+
+<center>
+<a href="asm7.htm">Zur&uuml;ck</a>   <a href="asm9.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</pre></font></p>
+</body>

@@ -1,0 +1,174 @@
+<!doctype html public "-//w3c//dtd html 3.2 final//en">
+<html>
+<head>
+<title>Assemblerseite von Marcus Roming</TITLE>
+<META NAME="Author" CONTENT="Marcus Roming">
+<META NAME="Design" CONTENT="Camal Cakar">
+
+
+		<style type="text/css">
+		<!--
+		pre { font-size:10pt }
+		//-->
+		</style>
+
+</head>
+
+<body>
+<body bgcolor = "000000">
+<font face="arial,times new roman" size=2 color = "FFD200">
+<p><font size=1>Version 2.0 Aktualisiert: 30.03.04</font><BR><BR>
+<center><img src = "gfx/logo.jpg"></center><br><br>
+Das Programm "Wie geht´s soll zeigen, wie man dem Benutzer eine Frage stellen kann, auf die er
+mit ja oder nein antworten kann und dann eine Entsprechende Antwort erh&auml;lt. In unserem Fall
+soll es die Frage "Geht es Ihnen gut?" sein. Der Benutzer soll auf diese Frage antworten k&ouml;nnen,
+indem er entweder "j" f&uuml;r ja oder "n" f&uuml;r nein dr&uuml;ckt. Lautet die Antwort des Benutzers ja dann 
+soll der Computer mit "Toll!" antworten, lautet die Antwort des Benutzers nein soll die 
+Computerantwort "Schade!" lauten. Ich werde im folgenden den Code f&uuml;r eine EXE Datei zeigen,
+und danach den f&uuml;r eine COM Datei.<BR>
+<BR>
+<u>Programm f&uuml;r eine EXE Datei:</u><BR>
+<pre>
+
+                      .MODEL SMALL                     ;Standart Speichermodell fuer EXE
+                      .STACK 100h                      ;100h Stack sind mehr als genug
+                      .DATA                            ;Beginn des Datensegements
+Frage                 DB  "Geht es Ihnen gut (j/n)?$"  ;Die Frage und die Antworten enden
+Antwort1              DB  13,10,"Toll !$"              ;mit einem $ um DOS zu zeigen, dass
+Antwort2              DB  13,10,"Schade !$"            ;es keine Zeichen mehr ausgeben soll
+                                                       ;13=Carriage Return 
+                                                       ;10=Zeilenvorschub, d.h. zur naechsten
+                                                       ;Zeile an den Anfang gehen.
+                   
+                      .CODE                            ;Beginn des Codesegmentes
+                      mov  ax,@data                    ;@data ist eine Vordefinierte Konstante,
+                                                       ;sie enthaelt die Adresse des 
+                                                       ;Datensegments
+                      mov  ds,ax                       ;ds = ax = @data => Datensegment bereit
+                      mov  dx,OFFSET Frage             ;Die Offsetadresse der Frage nach dx
+                      mov  ah,09h                      ;DOS Funktion 9: Stringausgabe.
+                                                       ;Ausgegeben wir der String an DS:DX 
+                                                       ;bis $
+                      int  21h                         ;DOS Funktion 9 ausfuehren!
+
+                      mov  ah,07h                      ;DOS Funktion 7: Zeichen von Tastatur 
+                      int  21h                         ;lesen. Das Zeichen wird in al 
+                                                       ;ausgegeben.
+                      cmp  al,´j´                      ;Vergleiche al mit j ACHTUNG SIEHE UNTEN
+                      je   Toll                        ;Wenn gleich Springe zum Label Toll
+                      cmp  al,´J´                      ;Vergleiche al mit J ACHTUNG SIEHE UNTEN
+                      je   Toll                        ;Wenn gleich springe zum Label Toll
+
+NichtToll:                                             ;Dieses Label dient nur der Uebersicht.
+                      mov  ah,09h                      ;DOS Funktion 9: Stringausgabe
+                      lea  dx,Antwort2                 ;Anstatt mov dx,OFFSET Antwort2
+                      int  21h                         ;DOS Funktion ausfuehren.
+                      jmp  Ende                        ;Zum Label Ende springen.
+Toll:                                                   
+                      mov  ah,09h                      ;Ausgabe der Antwort 1 
+                      lea  dx,Antwort1                
+                      int  21h                           
+Ende:                                                    
+                      mov  ah,4Ch                      ;DOS Funktion Programm beenden.
+                      int  21h                         ;Programm beenden, Kontrolle ans 
+                                                       ;Betriebssystem geben.
+                      END                              ;Assembleranweisung: Ende des Programmes
+ 
+
+--> Erstellen der EXE-Datei mit TASM Dateiname und TLINK Dateiname
+Bsp.: Ihre Datei heisst frage.asm, tippen sie also: Tasm frage [Return] und dann Tlink frage[
+Return].
+
+<u>Programm f&uuml;r eine COM Datei:</u>
+
+
+                      .MODEL TINY                      ;Speichermodell fuer COM Dateien
+                      .CODE                            ;Daten kommen ebenfalls ins Codesegm.
+                      ORG 100h                         ;Eine COM Datei muss im Speicher bei
+                                                       ;Offset 100h beginnen, ORG 100h definiert
+                                                       ;die Adresse des naechsten Befehls 
+                                                       ;==> Mehr dazu spaeter !
+                                                       ;CS=DS=SS=ES, DS muss nicht initialisiert 
+                                                       ;werden
+
+Start:                mov  ah,09h               
+                      mov  dx,OFFSET Frage                     
+                      int  21h                         ;Frage ausgeben
+                      mov  ah,07h                      
+                      int  21h                         ;Antwort nach al
+                      cmp  al,´j´                      ;Vergleiche al mit j ACHTUNG SIEHE UNTEN
+                      je   Toll                        ;Wenn gleich Springe zum Label Toll
+                      cmp  al,´J´                      ;Vergleiche al mit J ACHTUNG SIEHE UNTEN
+                      je   Toll                        ;Wenn gleich springe zum Label Toll
+
+NichtToll:                                             
+                      mov  ah,09h                      
+                      lea  dx,Antwort2                 
+                      int  21h                         ;Antwort 2 ausgeben.
+                      jmp  Ende                        ;Zum Label Ende springen.
+Toll:                                                   
+                      mov  ah,09h                      ;Ausgabe der Antwort 1 
+                      lea  dx,Antwort1                
+                      int  21h                           
+Ende:                                                    
+                      mov  ah,4Ch                      ;DOS Funktion Programm beenden.
+                      int  21h                 
+
+;Die Daten kommen erst am Ende, da diese sonst als Programmcode ausgefuert wuerden (es sei denn,
+;man ueberspringt diese mit jmp), dies haette unvorhersehbare folgen. Nach der DOS Funktion 4Ch
+;sind die Daten jedoch sicher, da das Programm ja vorher beendet wird bevor CS:IP die Daten 
+;erreicht.
+
+Frage                 DB  "Geht es Ihnen gut (j/n)?$"  
+Antwort1              DB  13,10,"Toll !$"              
+Antwort2              DB  13,10,"Schade !$"            
+
+                      END  Start                       ;Definiert das Label Start als Eingangs-
+;punkt (Entrypoint) bei COM Dateien kann ich keinen Sinn erkennen (es gehoert so) bei EXE 
+;Dateien hat man jedoch die Moeglichkeit den Entrypoint nicht nur an den Anfang des Programmes 
+;zu setzen, sondern auch in der Mitte oder sonstwo. Dies ermoeglicht der EXE Header.
+</pre>
+<BR>
+--> Erstellen der COM-Datei mit TASM Dateiname und TLINK /t Dateiname  (kleines t !!)<BR>
+Bsp.: Ihre Datei heisst frage.asm, tippen sie also: Tasm frage [Return] und dann Tlink /t frage
+[Return].<BR>
+<BR>                                               
+<u>Wichtiges zu COM-Dateien.</u><BR>
+In einer COM Datei m&uuml;ssen Daten und Code in ein Segment passen, daher d&uuml;rfen COM-Dateien
+maximal 64 KB gross sein (eine Ausnahme macht hier Edit.com  die Datei ist gr&ouml;sser als 64 KB,
+sie hat aber einen EXE-Header, und ist daher eigentlich auch eine EXE-Datei). Eine COM-Datei 
+hat aber auch Vorteile: Sie ist kleiner als eine vergleichbare EXE. Wen Sie eine COM-Datei 
+programmieren, brauchen Sie dennoch nicht auf einen Stack verzichten, er befindet sich im 
+selben Segment wie der Code (am Ende), darf also nicht zu groß werden da er sonst Daten oder 
+Code überschreibt! <BR>
+Existieren im selben Verzeichnis eine COM und eine EXE Datei mit gleichem Namen, so wird die 
+COM Datei immer zuerst gestartet. Es ist zumindest mir schon passiert, dass ich ein 
+"COM-Projekt" auf "EXE" umgestellt habe und vergessen habe die COM-Datei zu l&ouml;schen. 
+Anstatt meiner verbesserten "EXE" habe ich dann immer die alte "COM" gestartet und mich 
+gewundert, dass sich nichts tut na ja so weit so gut... <BR>
+Beim Start einer COM-Datei ist CS=SS=ES=DS.<BR>
+<BR>
+<i>Noch was:</i> Das Windows 95 - DOS Fenster hat viele Vorteile und nur wenige Nachteile:<BR>
+Vorteile im Falle eines Fehlers, wenn sich der Computer z.B. aufh&auml;ngt kann man mit Alt Tab
+einfach zu Windows wechseln und dann das Problem mit einem Rechtsklick auf den Programmknopf
+in der Task-Leiste beseitigen. Auch die Tatsache dass man auf einer virtuellen Maschine 
+arbeitet bringt Vorteile, da diese eine eigene Interruptvektortabelle hat. Hat man diese durch
+speicherresidente Proramme verändert, dann kann man einfach mit exit die virtuelle Maschine
+beenden und das todbringende Speicherresidente Programm kann auch keinen Schaden mehr anrichten.
+Der Nachteil ist, das bestimmte Programme im DOS-Fester gar nicht laufen, sondern nur im 
+"echten" DOS. Das ist mir auch schon passiert, kommt aber nur sehr selten vor.<BR>
+<BR>
+<u>ACHTUNG:</u><BR>
+Windows-Editoren verwenden einen anderen Zeichensatz als DOS-Editoren und der Assembler.
+Sie sollten daher immer ihre Programme mit dem DOS-Editor schreiben, da sonst der Assembler
+Fehler melden kann, weil er den Code nicht "versteht". Wenn Sie also die Programme nicht 
+abschreiben, sondern unter Windows kopieren, sollten Sie vorher den Code unbedingt mit dem
+DOS-Editor &uuml;berpr&uuml;fen. Anmerkung: Seit geraumer Zeit verwende ich EditPlus 1.25 für die Programmierung und habe keinerlei Probleme damit! Sieh Anhang!<BR>
+<BR>
+Weiter geht es mit einem weiteren <a href="asm6.htm">Programm</a>.
+<BR><BR>
+<center>
+<a href="asm4.htm">Zur&uuml;ck</a>   <a href="asm6.htm">Weiter</a>   <a href="inhalt.htm">Inhalt</a>
+</center>
+</font></p>
+</body>
